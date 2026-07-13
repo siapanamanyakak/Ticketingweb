@@ -13,7 +13,7 @@
     $phase      = $hasResponded ? 'resolution' : 'response';
     $phaseLabel = $phase === 'response' ? 'Response' : 'Resolution';
 
-    // Sisa menit kerja aktif (integer, bukan kalender)
+    // Sisa menit kerja aktif
     $remainingMinutes = 0;
     $totalSlaMinutes  = 0;
     $percentage       = 100;
@@ -34,18 +34,17 @@
             || ($deadline && now()->gt($deadline));
     }
 
-    // ATURAN 4: Class berbasis persentase waktu kerja murni
     $timerClass = match(true) {
-        $isResolved                => $slaRecord?->resolution_breached ? 'breached' : 'on-time',
+        $isResolved                  => $slaRecord?->resolution_breached ? 'breached' : 'on-time',
         $isPaused || $isOutsideHours => 'paused',
-        $isBreached                => 'breached',
-        $percentage <= 15          => 'danger',
-        $percentage <= 50          => 'warning',
-        default                    => 'on-time',
+        $isBreached                  => 'breached',
+        $percentage <= 15            => 'danger',
+        $percentage <= 50            => 'warning',
+        default                      => 'on-time',
     };
 
-    // Label pause
-    $pauseLabel = $isOutsideHours && !$isPaused
+    // FIX: Utamakan jam luar kerja terlebih dahulu
+    $pauseLabel = $isOutsideHours
         ? 'SLA Paused (Outside Hours)'
         : 'SLA Paused (Pending)';
 @endphp

@@ -11,8 +11,7 @@ use Carbon\Carbon;
 
 class SlaService
 {
-    // ── ATURAN 1: Hitung menit kerja bersih antara dua waktu ──
-    // Anti-jam kalender — hanya hitung menit dalam rentang jam operasional
+    // hanya hitung menit dalam rentang jam operasional
     public function getWorkingMinutesBetween(Carbon $start, Carbon $end): int
     {
         if ($end->lte($start)) return 0;
@@ -28,7 +27,6 @@ class SlaService
             $dayOfWeek = $current->dayOfWeek;
             $schedule  = $workSchedules->get($dayOfWeek);
 
-            // Bukan hari kerja — lompat ke hari berikutnya
             if (!$schedule) {
                 $current->addDay()->startOfDay();
                 continue;
@@ -37,18 +35,15 @@ class SlaService
             $workStart = $current->copy()->setTimeFromTimeString($schedule->start_time);
             $workEnd   = $current->copy()->setTimeFromTimeString($schedule->end_time);
 
-            // Posisi current sebelum jam kerja dimulai
             if ($current->lt($workStart)) {
                 $current = $workStart->copy();
             }
 
-            // Posisi current sudah melewati jam kerja hari ini
             if ($current->gte($workEnd)) {
                 $current->addDay()->startOfDay();
                 continue;
             }
 
-            // Batas akhir hari ini: mana yang lebih dulu antara $end dan $workEnd
             $effectiveEnd = $end->lt($workEnd) ? $end : $workEnd;
 
             $minutesThisSegment = (int) $current->diffInMinutes($effectiveEnd);
@@ -104,7 +99,6 @@ class SlaService
         return $current;
     }
 
-    // ── Cek apakah sekarang jam kerja ─────────────
     public function isWorkingHours(): bool
     {
         $now      = now();
@@ -121,7 +115,6 @@ class SlaService
     }
 
     // ── Buat SLA record saat tiket dibuat ─────────
-    // FONDASI UTAMA: response & resolution dihitung INDEPENDEN dari created_at
     public function createSlaRecord(Ticket $ticket): SlaRecord
     {
         $sla = Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))
@@ -193,10 +186,8 @@ class SlaService
         $slaRecord = $ticket->slaRecord;
         if (!$slaRecord) return;
 
-        // Akumulasi total_paused_minutes dengan menit kerja bersih
         $newTotalPaused = $slaRecord->total_paused_minutes + $workingPauseDuration;
 
-        // Extend deadline sebesar durasi menit kerja bersih
         $newResolutionDeadline = $this->calculateDeadline(
             $slaRecord->resolution_deadline->copy(),
             $workingPauseDuration
