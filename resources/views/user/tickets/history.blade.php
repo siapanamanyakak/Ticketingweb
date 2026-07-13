@@ -126,7 +126,7 @@
                         <span class="ticket-title">{{ $ticket->title }}</span>
                     </div>
                     <span class="ticket-response-time">
-                        Ditutup: {{ $ticket->closed_at?->format('d M Y, H:i') ?? '-' }}
+                        closed: {{ $ticket->closed_at?->format('d M Y, H:i') ?? '-' }}
                     </span>
                 </div>
 
@@ -145,10 +145,6 @@
                         @else
                             <span class="badge badge-resolved">SLA On-Time</span>
                         @endif
-                    @endif
-
-                    @if($ticket->had_pending)
-                        <span class="badge badge-pending">Had Pending {{ $ticket->pending_count }}x</span>
                     @endif
                 </div>
 
