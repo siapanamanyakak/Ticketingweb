@@ -29,7 +29,7 @@ class TicketOutsideWorkingHours extends Notification
         return [
             'type'      => 'outside_working_hours',
             'ticket_id' => $this->ticket->id,
-            'message'   => "🌙 Tiket {$this->ticket->ticket_number} dibuat diluar jam kerja. SLA akan mulai saat jam kerja.",
+            'message'   => "🌙 Ticket {$this->ticket->ticket_number} was created outside working hours. SLA will start when working hours begin.",
             'url'       => $url,
         ];
     }

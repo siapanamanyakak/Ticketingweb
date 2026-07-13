@@ -34,24 +34,24 @@ function openStatusModal(ticketId, newStatus, newLabel, noteRequired) {
     document.querySelectorAll('.quick-dropdown').forEach(d => d.classList.remove('open'));
 
     // Set judul modal
-    document.getElementById('quickModalTitle').textContent = 'Update Status Tiket';
+    document.getElementById('quickModalTitle').textContent = 'Update Ticket Status';
 
     // Set deskripsi
     document.getElementById('quickModalDesc').innerHTML =
-        `Ubah status menjadi <strong>${newLabel}</strong>?`;
+        `Change status to <strong>${newLabel}</strong>?`;
 
     // Set label catatan
     const noteLabel = document.getElementById('quickModalNoteLabel');
     if (newStatus === 'pending') {
-        noteLabel.textContent  = 'Alasan Pending';
+        noteLabel.textContent  = 'Pending Reason';
         noteLabel.className    = 'form-label required';
     } else {
-        noteLabel.textContent  = 'Catatan (Opsional)';
+        noteLabel.textContent  = 'Note (Optional)';
         noteLabel.className    = 'form-label';
     }
 
     document.getElementById('quickModalNote').placeholder =
-        newStatus === 'pending' ? 'Wajib isi alasan pending...' : 'Tambahkan catatan...';
+        newStatus === 'pending' ? 'Pending reason is required...' : 'Add a note...';
     document.getElementById('quickModalNote').required = noteRequired;
     document.getElementById('quickModalNote').value    = '';
 
@@ -83,17 +83,17 @@ function openPriorityModal(ticketId, priorityId, priorityLabel) {
 
     document.querySelectorAll('.quick-dropdown').forEach(d => d.classList.remove('open'));
 
-    document.getElementById('quickModalTitle').textContent = 'Update Prioritas Tiket';
+    document.getElementById('quickModalTitle').textContent = 'Update Ticket Priority';
     document.getElementById('quickModalDesc').innerHTML    =
-        `Ubah prioritas menjadi <strong>${priorityLabel}</strong>?`;
+        `Change priority to <strong>${priorityLabel}</strong>?`;
 
     const noteLabel = document.getElementById('quickModalNoteLabel');
     if (noteLabel) {
-        noteLabel.textContent = 'Catatan (Opsional)';
+        noteLabel.textContent = 'Note (Optional)';
         noteLabel.className   = 'form-label';
     }
 
-    document.getElementById('quickModalNote').placeholder = 'Tambahkan catatan...';
+    document.getElementById('quickModalNote').placeholder = 'Add a note...';
     document.getElementById('quickModalNote').required    = false;
     document.getElementById('quickModalNote').value       = '';
 
@@ -130,7 +130,7 @@ function submitQuickAction() {
         const noteInput = document.getElementById('quickModalNote');
         noteInput.style.borderColor = '#dc2626';
         noteInput.focus();
-        noteInput.placeholder = '⚠ Alasan pending wajib diisi!';
+        noteInput.placeholder = '⚠ Pending reason is required!';
         return;
     }
 
@@ -139,7 +139,7 @@ function submitQuickAction() {
         const resInput = document.getElementById('quickModalResolution');
         resInput.style.borderColor = '#dc2626';
         resInput.focus();
-        resInput.placeholder = '⚠ Catatan penyelesaian wajib diisi!';
+        resInput.placeholder = '⚠ Resolution notes are required!';
         return;
     }
 

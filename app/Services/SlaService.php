@@ -11,18 +11,24 @@ use Carbon\Carbon;
 
 class SlaService
 {
-    // ── Hitung deadline dengan working hours ──────
-    public function calculateDeadline(Carbon $startTime, int $targetMinutes): Carbon
+    // ── ATURAN 1: Hitung menit kerja bersih antara dua waktu ──
+    // Anti-jam kalender — hanya hitung menit dalam rentang jam operasional
+    public function getWorkingMinutesBetween(Carbon $start, Carbon $end): int
     {
-        $workSchedules  = WorkSchedule::where('is_working_day', true)->get()->keyBy('day_of_week');
-        $remainingMinutes = $targetMinutes;
-        $current        = $startTime->copy();
+        if ($end->lte($start)) return 0;
 
-        while ($remainingMinutes > 0) {
+        $workSchedules = WorkSchedule::where('is_working_day', true)
+                                     ->get()
+                                     ->keyBy('day_of_week');
+
+        $total   = 0;
+        $current = $start->copy();
+
+        while ($current->lt($end)) {
             $dayOfWeek = $current->dayOfWeek;
             $schedule  = $workSchedules->get($dayOfWeek);
 
-            // Bukan hari kerja
+            // Bukan hari kerja — lompat ke hari berikutnya
             if (!$schedule) {
                 $current->addDay()->startOfDay();
                 continue;
@@ -31,18 +37,60 @@ class SlaService
             $workStart = $current->copy()->setTimeFromTimeString($schedule->start_time);
             $workEnd   = $current->copy()->setTimeFromTimeString($schedule->end_time);
 
-            // Sebelum jam kerja
+            // Posisi current sebelum jam kerja dimulai
             if ($current->lt($workStart)) {
                 $current = $workStart->copy();
             }
 
-            // Sesudah jam kerja
+            // Posisi current sudah melewati jam kerja hari ini
             if ($current->gte($workEnd)) {
                 $current->addDay()->startOfDay();
                 continue;
             }
 
-            $minutesLeftToday = $current->diffInMinutes($workEnd);
+            // Batas akhir hari ini: mana yang lebih dulu antara $end dan $workEnd
+            $effectiveEnd = $end->lt($workEnd) ? $end : $workEnd;
+
+            $minutesThisSegment = (int) $current->diffInMinutes($effectiveEnd);
+            $total             += $minutesThisSegment;
+
+            // Lanjut ke hari berikutnya
+            $current = $workEnd->copy()->addSecond()->startOfDay();
+            $current->addDay()->startOfDay();
+        }
+
+        return max(0, $total);
+    }
+
+    // ── Hitung deadline dengan working hours ──────
+    public function calculateDeadline(Carbon $startTime, int $targetMinutes): Carbon
+    {
+        $workSchedules    = WorkSchedule::where('is_working_day', true)->get()->keyBy('day_of_week');
+        $remainingMinutes = $targetMinutes;
+        $current          = $startTime->copy();
+
+        while ($remainingMinutes > 0) {
+            $dayOfWeek = $current->dayOfWeek;
+            $schedule  = $workSchedules->get($dayOfWeek);
+
+            if (!$schedule) {
+                $current->addDay()->startOfDay();
+                continue;
+            }
+
+            $workStart = $current->copy()->setTimeFromTimeString($schedule->start_time);
+            $workEnd   = $current->copy()->setTimeFromTimeString($schedule->end_time);
+
+            if ($current->lt($workStart)) {
+                $current = $workStart->copy();
+            }
+
+            if ($current->gte($workEnd)) {
+                $current->addDay()->startOfDay();
+                continue;
+            }
+
+            $minutesLeftToday = (int) $current->diffInMinutes($workEnd);
 
             if ($remainingMinutes <= $minutesLeftToday) {
                 $current->addMinutes($remainingMinutes);
@@ -73,24 +121,18 @@ class SlaService
     }
 
     // ── Buat SLA record saat tiket dibuat ─────────
+    // FONDASI UTAMA: response & resolution dihitung INDEPENDEN dari created_at
     public function createSlaRecord(Ticket $ticket): SlaRecord
     {
-        $sla = \App\Models\Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))->firstOrFail();
+        $sla = Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))
+                  ->firstOrFail();
 
-        $startTime = now();
         $isWorking = $this->isWorkingHours();
+        $anchor    = $isWorking ? now() : $this->getNextWorkingTime();
 
-        if (!$isWorking) {
-            $startTime = $this->getNextWorkingTime();
-        }
-
-        // Response deadline dihitung dari created_at
-        $responseDeadline = $this->calculateDeadline($startTime->copy(), $sla->response_time);
-
-        // Resolution deadline BELUM dihitung sekarang
-        // Akan dihitung ulang saat first_response_at terisi (status → in_progress)
-        // Sementara set dari created_at + response + resolution
-        $resolutionDeadline = $this->calculateDeadline($startTime->copy(), $sla->response_time + $sla->resolution_time);
+        // Keduanya dihitung dari ANCHOR (created_at efektif) — INDEPENDEN
+        $responseDeadline   = $this->calculateDeadline($anchor->copy(), $sla->response_time);
+        $resolutionDeadline = $this->calculateDeadline($anchor->copy(), $sla->resolution_time);
 
         $record = SlaRecord::create([
             'ticket_id'            => $ticket->id,
@@ -115,7 +157,6 @@ class SlaService
     // ── Pause SLA ─────────────────────────────────
     public function pauseSla(Ticket $ticket, string $reason): void
     {
-        // Cek apakah sudah ada pause yang aktif
         $activePause = SlaPause::where('ticket_id', $ticket->id)
                                ->whereNull('resumed_at')
                                ->first();
@@ -129,81 +170,88 @@ class SlaService
         }
     }
 
-    // ── Resume SLA ────────────────────────────────
+    // ── Resume SLA — ATURAN 1: Gunakan getWorkingMinutesBetween ──
     public function resumeSla(Ticket $ticket): void
     {
         $activePause = SlaPause::where('ticket_id', $ticket->id)
-                            ->whereNull('resumed_at')
-                            ->first();
+                               ->whereNull('resumed_at')
+                               ->first();
 
         if (!$activePause) return;
 
-        $duration = $activePause->paused_at->diffInMinutes(now());
+        // Hitung durasi pause dalam menit kerja BERSIH
+        $workingPauseDuration = $this->getWorkingMinutesBetween(
+            $activePause->paused_at,
+            now()
+        );
 
         $activePause->update([
             'resumed_at'       => now(),
-            'duration_minutes' => $duration,
+            'duration_minutes' => $workingPauseDuration,
         ]);
 
         $slaRecord = $ticket->slaRecord;
         if (!$slaRecord) return;
 
-        // Update total paused minutes
-        $newTotalPaused = $slaRecord->total_paused_minutes + $duration;
+        // Akumulasi total_paused_minutes dengan menit kerja bersih
+        $newTotalPaused = $slaRecord->total_paused_minutes + $workingPauseDuration;
 
-        // Extend deadline sebesar durasi pause — ini yang penting!
-        // Jangan recalculate dari awal, cukup tambahkan durasi pause ke deadline existing
-        $newResolutionDeadline = $slaRecord->resolution_deadline->copy()->addMinutes($duration);
+        // Extend deadline sebesar durasi menit kerja bersih
+        $newResolutionDeadline = $this->calculateDeadline(
+            $slaRecord->resolution_deadline->copy(),
+            $workingPauseDuration
+        );
 
-        // Response deadline hanya di-extend kalau belum direspon
         $newResponseDeadline = $slaRecord->response_met_at
             ? $slaRecord->response_deadline
-            : $slaRecord->response_deadline->copy()->addMinutes($duration);
+            : $this->calculateDeadline(
+                $slaRecord->response_deadline->copy(),
+                $workingPauseDuration
+            );
 
-        // PENTING: Jangan ubah breach status yang sudah true
-        // Kalau sudah breach sebelum pause, tetap breach
+        // Breach sebelum pause TETAP breach — tidak di-reset
         $slaRecord->update([
             'total_paused_minutes' => $newTotalPaused,
             'resolution_deadline'  => $newResolutionDeadline,
             'response_deadline'    => $newResponseDeadline,
-            // resolution_breached TIDAK diubah di sini
         ]);
     }
 
+    // ── Recalculate SLA saat priority berubah ─────
     public function recalculateSla(Ticket $ticket): void
-{
-    $slaRecord = $ticket->slaRecord;
-    if (!$slaRecord) return;
+    {
+        $slaRecord = $ticket->slaRecord;
+        if (!$slaRecord) return;
 
-    $sla = \App\Models\Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))->first();
-    if (!$sla) return;
+        $sla = Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))->first();
+        if (!$sla) return;
 
-    // Hitung ulang dari waktu tiket dibuat + total paused minutes
-    $startTime = $ticket->created_at->copy();
+        // Anchor murni dari created_at — BUKAN first_response_at
+        $anchor = $ticket->created_at->copy();
 
-    // Kalau sudah ada response, recalculate resolution dari first_response_at
-    $resolutionStart = $ticket->first_response_at ?? $ticket->created_at;
+        // Hitung ulang dari nol dengan SLA baru
+        $newResponseDeadline   = $this->calculateDeadline($anchor->copy(), $sla->response_time);
+        $newResolutionDeadline = $this->calculateDeadline($anchor->copy(), $sla->resolution_time);
 
-    // Tambahkan total paused minutes ke deadline
-    $newResolutionDeadline = $this->calculateDeadline(
-        $resolutionStart->copy(),
-        $sla->resolution_time
-    );
+        // Kompensasi total pause yang sudah terjadi
+        if ($slaRecord->total_paused_minutes > 0) {
+            $newResponseDeadline   = $this->calculateDeadline(
+                $newResponseDeadline->copy(),
+                $slaRecord->total_paused_minutes
+            );
+            $newResolutionDeadline = $this->calculateDeadline(
+                $newResolutionDeadline->copy(),
+                $slaRecord->total_paused_minutes
+            );
+        }
 
-    // Tambahkan total paused minutes
-    if ($slaRecord->total_paused_minutes > 0) {
-        $newResolutionDeadline->addMinutes($slaRecord->total_paused_minutes);
-    }
-
-    $newResponseDeadline = $this->calculateDeadline(
-        $ticket->created_at->copy(),
-        $sla->response_time
-    );
-
-    $slaRecord->update([
-        'response_deadline'   => $slaRecord->response_met_at ? $slaRecord->response_deadline : $newResponseDeadline,
-        'resolution_deadline' => $newResolutionDeadline,
-    ]);
+        $slaRecord->update([
+            // Response deadline hanya diupdate kalau belum direspon
+            'response_deadline'   => $slaRecord->response_met_at
+                ? $slaRecord->response_deadline
+                : $newResponseDeadline,
+            'resolution_deadline' => $newResolutionDeadline,
+        ]);
     }
 
     // ── Cari jam kerja berikutnya ─────────────────
@@ -221,55 +269,35 @@ class SlaService
             $workStart = $day->copy()->setTimeFromTimeString($schedule->start_time);
             $workEnd   = $day->copy()->setTimeFromTimeString($schedule->end_time);
 
-            if ($i === 0 && $current->between($workStart, $workEnd)) {
-                return $current;
-            }
-
-            if ($i === 0 && $current->lt($workStart)) {
-                return $workStart;
-            }
-
-            if ($i > 0) {
-                return $workStart;
-            }
+            if ($i === 0 && $current->between($workStart, $workEnd)) return $current;
+            if ($i === 0 && $current->lt($workStart)) return $workStart;
+            if ($i > 0) return $workStart;
         }
 
         return $current;
     }
 
-    // ── Cek & update breach status ────────────────
-    public function checkBreach(Ticket $ticket): void
+    // ── Hitung sisa menit kerja aktif ─────────────
+    public function getRemainingWorkingMinutes(Ticket $ticket, string $phase = 'resolution'): int
     {
         $slaRecord = $ticket->slaRecord;
-        if (!$slaRecord) return;
+        if (!$slaRecord) return 0;
 
-        $now = now();
+        $deadline = $phase === 'response'
+            ? $slaRecord->response_deadline
+            : $slaRecord->resolution_deadline;
 
-        if (!$slaRecord->response_breached && !$slaRecord->response_met_at && $now->gt($slaRecord->response_deadline)) {
-            $slaRecord->update(['response_breached' => true]);
-        }
+        if (!$deadline || now()->gte($deadline)) return 0;
 
-        if (!$slaRecord->resolution_breached && !in_array($ticket->status, ['resolved', 'closed']) && $now->gt($slaRecord->resolution_deadline)) {
-            $slaRecord->update(['resolution_breached' => true]);
-        }
+        return $this->getWorkingMinutesBetween(now(), $deadline);
     }
 
-    // ── Ambil sisa waktu SLA ──────────────────────
-    public function getRemainingTime(Ticket $ticket): array
+    // ── Total menit SLA untuk fase tertentu ───────
+    public function getTotalSlaMinutes(Ticket $ticket, string $phase = 'resolution'): int
     {
-        $slaRecord = $ticket->slaRecord;
-        if (!$slaRecord) return [];
+        $sla = Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))->first();
+        if (!$sla) return 0;
 
-        $now      = now();
-        $deadline = $slaRecord->resolution_deadline;
-        $diff     = $now->diff($deadline);
-
-        return [
-            'is_breached' => $now->gt($deadline),
-            'is_paused'   => SlaPause::where('ticket_id', $ticket->id)->whereNull('resumed_at')->exists(),
-            'deadline'    => $deadline,
-            'hours'       => ($diff->days * 24) + $diff->h,
-            'minutes'     => $diff->i,
-        ];
+        return $phase === 'response' ? $sla->response_time : $sla->resolution_time;
     }
 }

@@ -35,7 +35,7 @@ class NewCommentNotification extends Notification
             'ticket_number' => $this->ticket->ticket_number,
             'title'         => $this->ticket->title,
             'commenter'     => $this->commenter->name,
-            'message'       => "{$this->commenter->name} menambahkan komentar pada tiket {$this->ticket->ticket_number}",
+            'message'       => "{$this->commenter->name} Added a comment to ticket {$this->ticket->ticket_number}",
             'url'           => $url,
         ];
     }

@@ -26,6 +26,6 @@ class TicketLog extends Model
 
     public function updatedBy()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by')->withTrashed();
     }
 }

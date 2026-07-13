@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
         $user = auth()->user();
 
         // Flash success message
-        session()->flash('success', 'Selamat datang kembali, ' . explode(' ', $user->name)[0] . '! 👋');
+        session()->flash('success', 'Welcome back, ' . explode(' ', $user->name)[0] . '! 👋');
 
         return redirect()->intended(match($user->role) {
             'it_supervisor' => route('supervisor.dashboard'),

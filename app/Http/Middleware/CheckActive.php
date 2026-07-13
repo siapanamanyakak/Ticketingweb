@@ -16,7 +16,7 @@ class CheckActive
             $request->session()->regenerateToken();
 
             return redirect()->route('login')
-                ->with('error', 'Akun Anda telah dinonaktifkan. Hubungi administrator.');
+                ->with('error', 'Your account has been deactivated. Please contact the administrator.');
         }
 
         return $next($request);

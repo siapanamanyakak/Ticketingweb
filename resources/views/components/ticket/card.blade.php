@@ -51,7 +51,7 @@
         </span>
 
         @if($ticket->slaRecord)
-            <x-ui.sla-timer :ticket="$ticket" />
+            <x-ui.sla-timer :ticket="$ticket"/>
         @endif
     </div>
 
@@ -75,7 +75,7 @@
         <div class="ticket-card-actions">
 
             {{-- Priority Dropdown (hanya support) --}}
-            @if($isSupport && !in_array($status, ['resolved', 'closed']))
+            @if($isSupport && !in_array($status, ['closed']))
                 <div class="quick-action-wrapper">
                     <button class="quick-action-btn {{ $priority }}"
                             onclick="toggleDropdown('priority-{{ $ticket->id }}')">

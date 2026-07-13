@@ -34,7 +34,7 @@ class CommentController extends Controller
             'field_changed' => 'comment',
             'status_before' => null,
             'status_after'  => null,
-            'note'          => 'Komentar baru ditambahkan',
+            'note'          => 'Comment added',
         ]);
 
         // Notifikasi ke IT Support kalau ada
@@ -43,6 +43,6 @@ class CommentController extends Controller
             $support->notify(new \App\Notifications\NewCommentNotification($ticket, auth()->user()));
         }
 
-        return back()->with('success', 'Komentar berhasil ditambahkan!');
+        return back()->with('success', 'Comment added successfully!');
     }
 }

@@ -119,9 +119,26 @@ public function history(Request $request)
     public function show(Ticket $ticket, SlaService $slaService)
     {
         $ticket->load(['reporter', 'category', 'priority', 'slaRecord', 'slaPauses', 'comments.user', 'logs.updatedBy']);
-        $slaRemaining = $slaService->getRemainingTime($ticket);
+
+        $slaRemaining = null;
+
+        if ($ticket->slaRecord) {
+            // 1. Tentukan saat ini sedang mengejar SLA Response atau Resolution
+            $phase = $ticket->first_response_at ? 'resolution' : 'response';
+
+            // 2. Ambil deadline untuk mengecek status breached (terlambat)
+            $deadline = $phase === 'response'
+                ? $ticket->slaRecord->response_deadline
+                : $ticket->slaRecord->resolution_deadline;
+
+            // 3. Rakit array manual memanggil fungsi SlaService yang baru
+            $slaRemaining = [
+                'total_remaining_minutes' => $slaService->getRemainingWorkingMinutes($ticket, $phase),
+                'total_sla_minutes'       => $slaService->getTotalSlaMinutes($ticket, $phase),
+                'is_breached'             => $deadline ? now()->gte($deadline) : false,
+            ];
+        }
 
         return view('supervisor.tickets.show', compact('ticket', 'slaRemaining'));
     }
 }
-

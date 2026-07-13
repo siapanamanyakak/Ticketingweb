@@ -1,244 +1,78 @@
 /* ═══════════════════════════════════════════
-   AUTH PAGE BASE
+   AUTH BASE
 ═══════════════════════════════════════════ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
+    background: #0f2044;
     display: flex;
-    background: #0a1628;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
 }
 
 /* ═══════════════════════════════════════════
-   HERO SECTION (kiri)
+   LOGIN WRAPPER & CARD
 ═══════════════════════════════════════════ */
-.hero {
-    flex: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 40px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #0a1628 0%, #0f2044 50%, #1a3160 100%);
-}
-
-.hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(10,22,40,0.3) 0%,
-        rgba(10,22,40,0.1) 40%,
-        rgba(10,22,40,0.7) 100%
-    );
-    z-index: 1;
-}
-
-.hero-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-}
-
-.hero-bg-placeholder {
+.login-wrapper {
     width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #0f2044, #1e3a7a, #1a3160);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 100vh;
 }
 
-.hero-bg-placeholder svg {
-    width: 200px;
-    height: 200px;
-    opacity: 0.1;
-    color: white;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-}
-
-/* ── Hero Logo ── */
-.hero-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.hero-logo-icon {
-    width: 44px;
-    height: 44px;
-    background: rgba(255,255,255,0.15);
-    border: 1.5px solid rgba(255,255,255,0.3);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(8px);
-}
-
-.hero-logo-icon svg,
-.hero-logo-icon img {
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
-}
-
-.hero-logo-name {
-    font-size: 16px;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    display: block;
-}
-
-.hero-logo-sub {
-    font-size: 10px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    display: block;
-}
-
-/* ── Hero Middle ── */
-.hero-middle { text-align: center; }
-
-.hero-image-wrapper {
-    width: 380px;
-    height: 260px;
-    margin: 0 auto 32px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 2px solid rgba(255,255,255,0.15);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    background: rgba(255,255,255,0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-image-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.hero-image-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    color: rgba(255,255,255,0.3);
-}
-
-.hero-image-placeholder svg {
-    width: 64px;
-    height: 64px;
-}
-
-.hero-image-placeholder span {
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.hero-title {
-    font-size: 32px;
-    font-weight: 800;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    line-height: 1.2;
-    margin-bottom: 8px;
-    text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-}
-
-.hero-subtitle {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.hero-line {
-    width: 40px;
-    height: 3px;
-    background: #2563eb;
-    border-radius: 2px;
-    margin: 12px auto 0;
-}
-
-/* ── Hero Tagline ── */
-.hero-tagline {
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.hero-tagline span { color: #3b82f6; }
-
-/* ═══════════════════════════════════════════
-   LOGIN PANEL (kanan)
-═══════════════════════════════════════════ */
-.login-panel {
-    width: 440px;
-    flex-shrink: 0;
+.login-card {
     background: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 48px 44px;
+    border-radius: 16px;
+    padding: 40px 44px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
 }
 
-/* ── Panel Logo ── */
-.login-panel-logo {
+/* ═══════════════════════════════════════════
+   LOGO
+═══════════════════════════════════════════ */
+.login-logo {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 36px;
+    margin-bottom: 28px;
 }
 
-.login-panel-logo-icon {
-    width: 36px;
-    height: 36px;
+.login-logo-icon {
+    width: 40px;
+    height: 40px;
     background: #0f2044;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.login-panel-logo-icon svg,
-.login-panel-logo-icon img {
-    width: 60%;
-    height: 60%;
-    object-fit: contain;
+.login-logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.login-panel-logo-name {
+.login-logo-name {
     font-size: 13px;
     font-weight: 800;
     color: #0f2044;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    line-height: 1.2;
     display: block;
+    line-height: 1.2;
 }
 
-.login-panel-logo-sub {
-    font-size: 9px;
+.login-logo-sub {
+    font-size: 10px;
     color: #6b7280;
     font-weight: 500;
     letter-spacing: 0.5px;
@@ -246,9 +80,11 @@ body {
     display: block;
 }
 
-/* ── Panel Title ── */
+/* ═══════════════════════════════════════════
+   TITLE
+═══════════════════════════════════════════ */
 .login-title {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #0a1628;
     text-align: center;
@@ -265,10 +101,12 @@ body {
     font-weight: 500;
     letter-spacing: 1px;
     text-transform: uppercase;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
 }
 
-/* ── Alerts ── */
+/* ═══════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════ */
 .auth-alert {
     border-radius: 10px;
     padding: 11px 14px;
@@ -278,7 +116,6 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    animation: fadeIn 0.3s ease;
 }
 
 .auth-alert svg { width: 16px; height: 16px; flex-shrink: 0; }
@@ -295,12 +132,9 @@ body {
     border: 1px solid #bbf7d0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Form ── */
+/* ═══════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════ */
 .form-group { margin-bottom: 18px; }
 
 .form-label {
@@ -339,6 +173,7 @@ body {
     color: #dc2626;
     margin-top: 5px;
     font-weight: 500;
+    display: block;
 }
 
 /* ── Password Toggle ── */
@@ -366,8 +201,7 @@ body {
 .form-bottom {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .remember-label {
@@ -409,22 +243,17 @@ body {
 
 /* ── Footer ── */
 .login-footer {
-    margin-top: 32px;
+    margin-top: 28px;
     text-align: center;
     font-size: 11px;
-    color: #d1d5db;
+    color: #9ca3af;
 }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
-@media (max-width: 768px) {
-    .hero { display: none; }
-
-    .login-panel {
-        width: 100%;
-        padding: 40px 28px;
-        min-height: 100vh;
-        justify-content: center;
+@media (max-width: 480px) {
+    .login-card {
+        padding: 32px 24px;
     }
 }

@@ -44,7 +44,9 @@ class DashboardController extends Controller
             'sla_compliance' => $this->getSlaComplianceRate(),
         ];
 
-        return view('supervisor.dashboard', compact('stats'));
+        $activeNews = \App\Models\News::active()->latest()->get();
+
+        return view('supervisor.dashboard', compact('stats', 'activeNews'));
     }
 
     private function getSlaComplianceRate(): float

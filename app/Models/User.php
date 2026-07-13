@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -40,7 +41,7 @@ class User extends Authenticatable
     // ── Relationships ─────────────────────────────
     public function department()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class)->withTrashed();
     }
 
     public function tickets()
@@ -50,11 +51,11 @@ class User extends Authenticatable
 
     public function comments()
     {
-        return $this->hasMany(TicketComment::class);
+        return $this->hasMany(TicketComment::class)->withTrashed();
     }
 
     public function ticketLogs()
     {
-        return $this->hasMany(TicketLog::class, 'updated_by');
+        return $this->hasMany(TicketLog::class, 'updated_by')->withTrashed();
     }
 }

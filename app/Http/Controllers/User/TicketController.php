@@ -153,7 +153,7 @@ public function history(Request $request)
         'field_changed' => 'status',
         'status_before' => null,
         'status_after'  => 'open',
-        'note'          => 'Tiket baru dibuat',
+        'note'          => 'Ticket created',
         'visibility'    => 'all',
         ]);
 
@@ -163,19 +163,35 @@ public function history(Request $request)
         }
 
         return redirect()->route('user.tickets.show', $ticket)
-            ->with('success', 'Tiket berhasil dibuat! Nomor tiket: ' . $ticket->ticket_number);
+            ->with('success', 'Ticket created successfully! Number: ' . $ticket->ticket_number);
     }
-
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket, SlaService $slaService)
     {
         // Pastikan user hanya bisa lihat tiketnya sendiri
         if ($ticket->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $ticket->load(['category', 'priority', 'slaRecord', 'comments.user', 'logs.updatedBy']);
+        // Tambahkan 'slaPauses' di sini agar performa database tetap ngebut
+        $ticket->load(['category', 'priority', 'slaRecord', 'slaPauses', 'comments.user', 'logs.updatedBy']);
 
-        return view('user.tickets.show', compact('ticket'));
+        $slaRemaining = null;
+
+        if ($ticket->slaRecord) {
+            $phase = $ticket->first_response_at ? 'resolution' : 'response';
+            $deadline = $phase === 'response'
+                ? $ticket->slaRecord->response_deadline
+                : $ticket->slaRecord->resolution_deadline;
+
+            $slaRemaining = [
+                'total_remaining_minutes' => $slaService->getRemainingWorkingMinutes($ticket, $phase),
+                'total_sla_minutes'       => $slaService->getTotalSlaMinutes($ticket, $phase),
+                'is_breached'             => $deadline ? now()->gte($deadline) : false,
+            ];
+        }
+
+        // Lempar variabel slaRemaining ke view
+        return view('user.tickets.show', compact('ticket', 'slaRemaining'));
     }
 }
 

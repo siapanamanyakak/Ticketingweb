@@ -27,6 +27,8 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('support.dashboard', compact('stats', 'openTickets'));
+        $activeNews = \App\Models\News::active()->latest()->get();
+
+        return view('support.dashboard', compact('stats', 'openTickets', 'activeNews'));
     }
 }

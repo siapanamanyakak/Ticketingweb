@@ -29,7 +29,7 @@ class CriticalTicketNotification extends Notification
         return [
             'type'      => 'critical_ticket',
             'ticket_id' => $this->ticket->id,
-            'message'   => "🚨 Tiket Critical masuk: {$this->ticket->ticket_number} — {$this->ticket->title}",
+            'message'   => "🚨 Critical Ticket: {$this->ticket->ticket_number} — {$this->ticket->title}",
             'url'       => $url,
         ];
     }

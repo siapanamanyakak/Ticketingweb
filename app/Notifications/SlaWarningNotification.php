@@ -12,7 +12,7 @@ class SlaWarningNotification extends Notification
 
     public function __construct(
         public Ticket $ticket,
-        public string $phase // 'response' atau 'resolution'
+        public string $phase // 'response' or 'resolution'
     ) {}
 
     public function via(object $notifiable): array
@@ -22,19 +22,12 @@ class SlaWarningNotification extends Notification
 
     public function toDatabase(object $notifiable): array
     {
-        $label = $this->phase === 'response' ? 'Respon' : 'Penyelesaian';
-
-                $url = match($notifiable->role) {
-            'it_support'    => route('support.tickets.show', $this->ticket),
-            'it_supervisor' => route('supervisor.tickets.show', $this->ticket),
-            default         => route('user.tickets.show', $this->ticket),
-        };
+        $label = $this->phase === 'response' ? 'Response' : 'Resolution';
 
         return [
             'type'      => 'sla_warning_' . $this->phase,
             'ticket_id' => $this->ticket->id,
-            'message'   => "⚠️ SLA {$label} tiket {$this->ticket->ticket_number} hampir terlewat!",
-            'url'       => $url,
+            'message'   => "⚠️ SLA {$label} for ticket {$this->ticket->ticket_number} is about to breach!",
         ];
     }
 }

@@ -67,9 +67,9 @@ class TicketStatusUpdated extends Notification
         $new = $statusLabels[$this->newStatus] ?? $this->newStatus;
 
         if (!$this->oldStatus) {
-            return "Tiket {$this->ticket->ticket_number} berhasil dibuat.";
+            return "Ticket {$this->ticket->ticket_number} has been created successfully.";
         }
 
-        return "Status tiket {$this->ticket->ticket_number} berubah dari {$old} ke {$new}.";
+        return "Ticket status {$this->ticket->ticket_number} has been updated from {$old} to {$new}.";
     }
 }

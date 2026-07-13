@@ -1,9 +1,12 @@
 <x-layout.app title="Dashboard" pageTitle="Dashboard">
 
+    {{-- News Banner --}}
+    <x-ui.news-banner :news="$activeNews" />
+
     <div class="page-header">
         <div>
-            <h1 class="page-title">Selamat Datang, {{ auth()->user()->name }}! 👋</h1>
-            <p class="page-subtitle">{{ now()->format('l, d F Y') }} — Ringkasan operasional IT Helpdesk</p>
+            <h1 class="page-title">Welcome, {{ auth()->user()->name }}! 👋</h1>
+            <p class="page-subtitle">{{ now()->format('l, d F Y') }} — Summary of IT Helpdesk Operations</p>
         </div>
     </div>
 
@@ -17,7 +20,7 @@
             </div>
             <div>
                 <div class="stat-card-value">{{ $stats['total_open'] }}</div>
-                <div class="stat-card-label">Tiket Open</div>
+                <div class="stat-card-label">Open Tickets</div>
             </div>
         </div>
 
@@ -65,7 +68,7 @@
             </div>
             <div>
                 <div class="stat-card-value">{{ $stats['sla_breached'] }}</div>
-                <div class="stat-card-label">SLA Terlewat</div>
+                <div class="stat-card-label">SLA Breached</div>
             </div>
         </div>
 
@@ -77,7 +80,7 @@
             </div>
             <div>
                 <div class="stat-card-value">{{ $stats['today_tickets'] }}</div>
-                <div class="stat-card-label">Tiket Hari Ini</div>
+                <div class="stat-card-label">Today's Tickets</div>
             </div>
         </div>
     </div>
@@ -88,7 +91,7 @@
         {{-- Weekly Trend Chart --}}
         <div class="card">
             <div class="card-header">
-                <span class="card-title">📈 Tren Tiket 7 Hari Terakhir</span>
+                <span class="card-title">📈 Weekly Ticket Trend</span>
             </div>
             <div class="card-body">
                 <div class="chart-wrapper">
@@ -100,7 +103,7 @@
         {{-- Status Distribution --}}
         <div class="card">
             <div class="card-header">
-                <span class="card-title">🍩 Distribusi Status</span>
+                <span class="card-title">🍩 Status Distribution</span>
             </div>
             <div class="card-body" style="display:flex; align-items:center; justify-content:center;">
                 <div style="width: 220px; height: 220px;">
@@ -138,11 +141,11 @@
                     </div>
                     <div style="text-align:center;">
                         @if($stats['sla_compliance'] >= 80)
-                            <span class="badge badge-resolved">Performa Baik</span>
+                            <span class="badge badge-resolved">Excellent Performance</span>
                         @elseif($stats['sla_compliance'] >= 60)
-                            <span class="badge badge-pending">Perlu Perhatian</span>
+                            <span class="badge badge-pending">Needs Attention</span>
                         @else
-                            <span class="badge badge-high">Performa Rendah</span>
+                            <span class="badge badge-high">Low Performance</span>
                         @endif
                     </div>
                 </div>
@@ -152,7 +155,7 @@
         {{-- Category Distribution --}}
         <div class="card">
             <div class="card-header">
-                <span class="card-title">📊 Tiket per Kategori</span>
+                <span class="card-title">📊 Tickets by Category</span>
             </div>
             <div class="card-body">
                 <div class="chart-wrapper">
@@ -172,7 +175,7 @@
             data: {
                 labels: {!! json_encode($stats['weekly_trend']->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))) !!},
                 datasets: [{
-                    label: 'Jumlah Tiket',
+                    label: 'Ticket Count',
                     data: {!! json_encode($stats['weekly_trend']->pluck('count')) !!},
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37,99,235,0.08)',
@@ -201,6 +204,7 @@
             data: {
                 labels: ['Open', 'In Progress', 'Pending', 'Resolved', 'Closed'],
                 datasets: [{
+                    label: 'Ticket Count',
                     data: [
                         {{ $stats['total_open'] }},
                         {{ $stats['total_in_progress'] }},
@@ -232,7 +236,7 @@
             data: {
                 labels: {!! json_encode($stats['category_distribution']->pluck('category.name')) !!},
                 datasets: [{
-                    label: 'Jumlah Tiket',
+                    label: 'Ticket Count',
                     data: {!! json_encode($stats['category_distribution']->pluck('count')) !!},
                     backgroundColor: '#2563eb',
                     borderRadius: 6,

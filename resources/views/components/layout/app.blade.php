@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'IT Helpdesk' }} — KTU Helpdesk</title>
-
+    <title>{{ $title ?? 'IT Helpdesk' }} — Ticketing IT</title>
+    <link rel="icon" href="{{ asset('img/Logo-KTU.jpg') }}" type="image/jpeg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
                 <x-ui.alert type="error" :message="session('error')" />
             @endif
             @if($errors->any())
-                <x-ui.alert type="error" message="Terdapat kesalahan pada form. Silakan periksa kembali." />
+                <x-ui.alert type="error" message="There are errors in the form. Please check again." />
             @endif
             {{ $slot }}
         </div>
@@ -43,58 +43,31 @@
 {{-- Toast Container --}}
 <div class="toast-container" id="toastContainer"></div>
 
-{{-- Quick Action Modal --}}
-<div class="quick-modal-overlay" id="quickModalOverlay">
-    <div class="quick-modal">
-        <div class="quick-modal-header">
-            <span class="quick-modal-title" id="quickModalTitle">Konfirmasi</span>
-            <button class="quick-modal-close" onclick="closeQuickModal()">✕</button>
-        </div>
-        <div class="quick-modal-body">
-            <p id="quickModalDesc" style="font-size:13px; color:var(--gray-600); margin-bottom:16px;"></p>
-            <div id="quickModalNoteField" class="form-group">
-                <label class="form-label" id="quickModalNoteLabel">Catatan (Opsional)</label>
-                <textarea id="quickModalNote" class="form-control" rows="2"
-                          placeholder="Tambahkan catatan..."></textarea>
-            </div>
-            <div id="resolutionField" style="display:none;" class="form-group">
-                <label class="form-label required">Catatan Penyelesaian</label>
-                <textarea id="quickModalResolution" class="form-control" rows="3"
-                          placeholder="Jelaskan langkah penyelesaian yang dilakukan..."></textarea>
-            </div>
-        </div>
-        <div class="quick-modal-footer">
-            <button class="btn btn-secondary" onclick="closeQuickModal()">Batal</button>
-            <button class="btn btn-primary" onclick="submitQuickAction()">Konfirmasi</button>
-        </div>
-    </div>
-</div>
-
 {{-- Log Detail Modal --}}
 <div class="quick-modal-overlay" id="logDetailOverlay">
     <div class="quick-modal" style="max-width:420px;">
         <div class="quick-modal-header">
-            <span class="quick-modal-title" id="logModalTitle">Detail Perubahan</span>
+            <span class="quick-modal-title" id="logModalTitle">Detail Changes</span>
             <button class="quick-modal-close" onclick="closeLogModal()">✕</button>
         </div>
         <div class="quick-modal-body">
             <div style="display:flex; flex-direction:column; gap:12px;">
                 <div class="panel-row">
-                    <span class="panel-row-label">Waktu</span>
+                    <span class="panel-row-label">Time</span>
                     <span class="panel-row-value" id="logModalTime"></span>
                 </div>
                 <div class="panel-row">
-                    <span class="panel-row-label">Oleh</span>
+                    <span class="panel-row-label">By</span>
                     <span class="panel-row-value" id="logModalBy"></span>
                 </div>
                 <div class="panel-row" id="logModalChangeRow">
-                    <span class="panel-row-label">Perubahan</span>
+                    <span class="panel-row-label">Changes</span>
                     <span class="panel-row-value" id="logModalChange"></span>
                 </div>
                 <div id="logModalNoteSection" style="display:none;">
                     <div style="font-size:11px; font-weight:700; color:var(--gray-400);
                                 text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;"
-                         id="logModalNoteLabel">Catatan</div>
+                         id="logModalNoteLabel">Note</div>
                     <div style="background:var(--gray-50); border-radius:8px; padding:12px;
                                 font-size:13px; color:var(--gray-700); line-height:1.6;"
                          id="logModalNote"></div>
@@ -102,7 +75,7 @@
             </div>
         </div>
         <div class="quick-modal-footer">
-            <button class="btn btn-secondary" onclick="closeLogModal()">Tutup</button>
+            <button class="btn btn-secondary" onclick="closeLogModal()">Close</button>
         </div>
     </div>
 </div>
@@ -116,12 +89,12 @@
             </div>
         </div>
         <div class="confirm-modal-body">
-            <div class="confirm-modal-title" id="confirmModalTitle">Konfirmasi</div>
-            <p class="confirm-modal-desc" id="confirmModalDesc">Apakah kamu yakin?</p>
+            <div class="confirm-modal-title" id="confirmModalTitle">Confirmation</div>
+            <p class="confirm-modal-desc" id="confirmModalDesc">Are you sure?</p>
         </div>
         <div class="confirm-modal-footer">
-            <button class="btn btn-secondary" onclick="closeConfirmModal()">Batal</button>
-            <button class="btn btn-danger" id="confirmModalBtn" onclick="executeConfirmAction()">Hapus</button>
+            <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+            <button class="btn btn-danger" id="confirmModalBtn" onclick="executeConfirmAction()">Delete</button>
         </div>
     </div>
 </div>
@@ -135,14 +108,14 @@
             </div>
         </div>
         <div class="confirm-modal-body">
-            <div class="confirm-modal-title">Keluar dari Aplikasi</div>
-            <p class="confirm-modal-desc">Apakah kamu yakin ingin keluar? Sesi kamu akan diakhiri.</p>
+            <div class="confirm-modal-title">Logout from Application</div>
+            <p class="confirm-modal-desc">Are you sure you want to logout? Your session will be terminated.</p>
         </div>
         <div class="confirm-modal-footer">
-            <button class="btn btn-secondary" onclick="closeLogoutModal()">Batal</button>
+            <button class="btn btn-secondary" onclick="closeLogoutModal()">Cancel</button>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="btn btn-primary">Ya, Keluar</button>
+                <button type="submit" class="btn btn-primary">Yes, Logout</button>
             </form>
         </div>
     </div>
@@ -157,15 +130,15 @@
             </div>
         </div>
         <div class="confirm-modal-body">
-            <div class="confirm-modal-title">Diluar Jam Kerja</div>
+            <div class="confirm-modal-title">Outside Working Hours</div>
             <p class="confirm-modal-desc">
-                Tiket <strong id="outsideTicketNumber"></strong> berhasil dibuat!
-                Namun saat ini diluar jam kerja operasional.
-                SLA akan mulai dihitung saat jam kerja dimulai.
+                Ticket <strong id="outsideTicketNumber"></strong> created successfully!
+                However, it is currently outside operational working hours.
+                The SLA will start counting when working hours begin.
             </p>
         </div>
         <div class="confirm-modal-footer">
-            <button class="btn btn-primary" onclick="closeOutsideWorkingHoursModal()">OK, Mengerti</button>
+            <button class="btn btn-primary" onclick="closeOutsideWorkingHoursModal()">OK, I Understand</button>
         </div>
     </div>
 </div>
@@ -257,10 +230,10 @@ function showToast(type, message, title) {
     const container = document.getElementById('toastContainer');
     const icons  = { success: '✅', error: '❌', warning: '⚠️', info: '📢' };
     const titles = {
-        success: title || 'Berhasil',
-        error:   title || 'Gagal',
-        warning: title || 'Peringatan',
-        info:    title || 'Informasi',
+        success: title || 'Success',
+        error:   title || 'Failed',
+        warning: title || 'Warning',
+        info:    title || 'Information',
     };
 
     const toast = document.createElement('div');
@@ -291,9 +264,9 @@ let confirmAction = null;
 
 function showConfirmModal(options) {
     const {
-        title    = 'Hapus Data',
-        desc     = 'Data yang dihapus tidak dapat dikembalikan.',
-        btnText  = 'Hapus',
+        title    = 'Delete Data',
+        desc     = 'Deleted data cannot be recovered.',
+        btnText  = 'Delete',
         btnClass = 'btn-danger',
         icon     = '🗑️',
         type     = 'danger',
@@ -325,9 +298,9 @@ function executeConfirmAction() {
 
 function confirmDelete(formId, itemName) {
     showConfirmModal({
-        title   : 'Hapus Data',
-        desc    : `Apakah kamu yakin ingin menghapus "${itemName}"? Data tidak dapat dikembalikan.`,
-        btnText : 'Hapus Permanen',
+        title   : 'Delete Data',
+        desc    : `Are you sure you want to delete "${itemName}"? Deleted data cannot be recovered.`,
+        btnText : 'Delete Permanently',
         btnClass: 'btn-danger',
         icon    : '🗑️',
         type    : 'danger',
@@ -365,13 +338,13 @@ function openLogModal(action, changedBy, time, before, after, field, note, statu
 
     if (note) {
         if (statusAfter === 'pending' || after === 'pending') {
-            noteLabelEl.textContent = 'Alasan Pending';
+            noteLabelEl.textContent = 'Reason for Pending';
         } else if (statusAfter === 'resolved' || after === 'resolved') {
-            noteLabelEl.textContent = 'Catatan Penyelesaian';
+            noteLabelEl.textContent = 'Resolution Note';
         } else if (field === 'priority') {
-            noteLabelEl.textContent = 'Catatan Perubahan Prioritas';
+            noteLabelEl.textContent = 'Priority Change Note';
         } else {
-            noteLabelEl.textContent = 'Catatan';
+            noteLabelEl.textContent = 'Note';
         }
         noteEl.textContent        = note;
         noteSection.style.display = 'block';

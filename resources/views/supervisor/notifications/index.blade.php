@@ -1,22 +1,22 @@
-<x-layout.app title="Notifikasi" pageTitle="Notifikasi">
+<x-layout.app title="Notification" pageTitle="Notification">
 
     <div class="page-header">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
             <div>
-                <h1 class="page-title">Notifikasi</h1>
-                <p class="page-subtitle">Semua notifikasi terkait aktivitas tiket kamu</p>
+                <h1 class="page-title">Notification</h1>
+                <p class="page-subtitle">All notifications related to your ticket activities</p>
             </div>
             @if(auth()->user()->readNotifications()->count() > 0)
                 <form method="POST" action="{{ route('supervisor.notifications.deleteRead') }}">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger btn-sm"
-                            onclick="return confirm('Hapus semua notifikasi yang sudah dibaca?')">
+                            onclick="return confirm('Delete all read notifications?')">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Hapus Semua yang Dibaca
+                        Delete All Read
                     </button>
                 </form>
             @endif
@@ -30,7 +30,7 @@
                 @csrf
                 @method('PATCH')
                 <button type="submit" class="btn btn-secondary btn-sm">
-                    ✓ Tandai Semua Sudah Dibaca
+                    ✓ Mark All as Read
                 </button>
             </form>
         </div>
@@ -46,12 +46,12 @@
 
             $typeConfig = match(true) {
                 str_contains($type, 'sla_warning')         => ['icon' => '⚠️', 'label' => 'SLA Warning',     'bg' => '#fef3c7', 'color' => '#b45309'],
-                $type === 'critical_ticket'                 => ['icon' => '🚨', 'label' => 'Tiket Critical',  'bg' => '#fce7f3', 'color' => '#9d174d'],
-                $type === 'outside_working_hours'           => ['icon' => '🌙', 'label' => 'Diluar Jam Kerja','bg' => '#eff6ff', 'color' => '#1d4ed8'],
-                $type === 'ticket_created'                  => ['icon' => '🎫', 'label' => 'Tiket Dibuat',    'bg' => '#f0fdf4', 'color' => '#15803d'],
-                $type === 'status_updated'                  => ['icon' => '🔄', 'label' => 'Status Diperbarui','bg' => '#eff6ff', 'color' => '#1d4ed8'],
-                $type === 'new_comment'                     => ['icon' => '💬', 'label' => 'Komentar Baru',   'bg' => '#f5f3ff', 'color' => '#6d28d9'],
-                default                                     => ['icon' => '📢', 'label' => 'Notifikasi',      'bg' => '#f9fafb', 'color' => '#374151'],
+                $type === 'critical_ticket'                 => ['icon' => '🚨', 'label' => 'Ticket Critical',  'bg' => '#fce7f3', 'color' => '#9d174d'],
+                $type === 'outside_working_hours'           => ['icon' => '🌙', 'label' => 'Outside Working Hours','bg' => '#eff6ff', 'color' => '#1d4ed8'],
+                $type === 'ticket_created'                  => ['icon' => '🎫', 'label' => 'Ticket Created',    'bg' => '#f0fdf4', 'color' => '#15803d'],
+                $type === 'status_updated'                  => ['icon' => '🔄', 'label' => 'Status Updated','bg' => '#eff6ff', 'color' => '#1d4ed8'],
+                $type === 'new_comment'                     => ['icon' => '💬', 'label' => 'New Comment',   'bg' => '#f5f3ff', 'color' => '#6d28d9'],
+                default                                     => ['icon' => '📢', 'label' => 'Notification',      'bg' => '#f9fafb', 'color' => '#374151'],
             };
 
             $statusColors = [
@@ -117,7 +117,7 @@
                 <p style="font-size:11px; color:var(--gray-400);">
                     {{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}
                     @if(!$isUnread)
-                        · <span style="color:#16a34a;">Sudah dibaca</span>
+                        · <span style="color:#16a34a;">Read</span>
                     @endif
                 </p>
             </div>
@@ -131,21 +131,21 @@
                     </form>
                 @else
                     <span class="btn btn-secondary btn-sm" style="opacity:0.5; cursor:default;">
-                        Sudah Dibaca
+                        Read
                     </span>
                 @endif
 
                 @if(isset($notif->data['url']))
                     <a href="{{ $notif->data['url'] }}" class="btn btn-primary btn-sm">
-                        Lihat Tiket
+                        View Ticket
                     </a>
                 @endif
             </div>
         </div>
     @empty
         <x-ui.empty-state
-            title="Tidak ada notifikasi"
-            description="Kamu belum memiliki notifikasi apapun."
+            title="There's no notification"
+            description="You don't have any notifications yet."
         />
     @endforelse
     </div>

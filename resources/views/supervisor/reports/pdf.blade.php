@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan IT Helpdesk</title>
+    <title>IT Helpdesk Reports</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #111827; }
@@ -33,24 +33,24 @@
 <body>
 
     <div class="header">
-        <h1>Laporan Layanan IT Helpdesk</h1>
-        <p>Periode: {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} — {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</p>
-        <p>Dicetak: {{ now()->format('d F Y, H:i') }}</p>
+        <h1>IT Helpdesk Reports</h1>
+        <p>Period: {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} — {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</p>
+        <p>Printed: {{ now()->format('d F Y, H:i') }}</p>
     </div>
 
     {{-- Summary --}}
     <div class="summary-grid">
         <div class="summary-item">
             <div class="summary-value">{{ $summary['total'] }}</div>
-            <div class="summary-label">Total Tiket</div>
+            <div class="summary-label">Total Tickets</div>
         </div>
         <div class="summary-item">
             <div class="summary-value" style="color:#16a34a;">{{ $summary['resolved'] }}</div>
-            <div class="summary-label">Diselesaikan</div>
+            <div class="summary-label">Resolved</div>
         </div>
         <div class="summary-item">
             <div class="summary-value" style="color:#dc2626;">{{ $summary['sla_breached'] }}</div>
-            <div class="summary-label">SLA Terlewat</div>
+            <div class="summary-label">SLA Breached</div>
         </div>
         <div class="summary-item">
             <div class="summary-value" style="color:#2563eb;">{{ $summary['compliance_rate'] }}%</div>
@@ -62,15 +62,15 @@
     <table>
         <thead>
             <tr>
-                <th>No. Tiket</th>
-                <th>Pelapor</th>
-                <th>Kategori</th>
-                <th>Prioritas</th>
+                <th>No. Ticket</th>
+                <th>Reporter</th>
+                <th>Category</th>
+                <th>Priority</th>
                 <th>Status</th>
                 <th>SLA</th>
                 <th>Pending</th>
-                <th>Dibuat</th>
-                <th>Selesai</th>
+                <th>Created</th>
+                <th>Resolved</th>
             </tr>
         </thead>
         <tbody>
@@ -91,11 +91,11 @@
                     </td>
                     <td>
                         @if($ticket->slaRecord?->resolution_breached)
-                            <span class="badge badge-high">Terlewat</span>
+                            <span class="badge badge-high">Breached</span>
                         @elseif($ticket->slaRecord?->resolution_met_at)
-                            <span class="badge badge-resolved">Tepat Waktu</span>
+                            <span class="badge badge-resolved">Fullfilled</span>
                         @else
-                            <span class="badge badge-pending">Berjalan</span>
+                            <span class="badge badge-pending">In Progress</span>
                         @endif
                     </td>
                     <td>{{ $ticket->had_pending ? $ticket->pending_count . 'x' : '—' }}</td>
@@ -107,7 +107,7 @@
     </table>
 
     <div class="footer">
-        KTU IT Helpdesk System — Laporan dibuat otomatis pada {{ now()->format('d F Y, H:i') }}
+        KTU IT Helpdesk System — Report generated automatically on {{ now()->format('d F Y, H:i') }}
     </div>
 
 </body>

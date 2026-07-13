@@ -11,10 +11,10 @@ class SlaSeeder extends Seeder
     public function run(): void
     {
         $slaData = [
-            'low'      => ['response_time' => 480,  'resolution_time' => 4320], // 8 jam, 72 jam
-            'medium'   => ['response_time' => 240,  'resolution_time' => 2880], // 4 jam, 48 jam
-            'high'     => ['response_time' => 60,   'resolution_time' => 1800], // 1 jam, 30 jam
-            'critical' => ['response_time' => 30,   'resolution_time' => 480],  // 30 menit, 8 jam
+            'low'      => ['response_time' => 120,  'resolution_time' => 480],
+            'medium'   => ['response_time' => 100,  'resolution_time' => 400],
+            'high'     => ['response_time' => 60,   'resolution_time' => 240],
+            'critical' => ['response_time' => 30,   'resolution_time' => 480],
         ];
 
         foreach ($slaData as $level => $times) {

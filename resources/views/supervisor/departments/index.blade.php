@@ -1,16 +1,16 @@
-<x-layout.app title="Manajemen Departemen" pageTitle="Manajemen Departemen">
+<x-layout.app title="Department Management" pageTitle="Department Management">
 
     <div class="page-header">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
             <div>
-                <h1 class="page-title">Manajemen Departemen</h1>
-                <p class="page-subtitle">Kelola departemen yang tersedia dalam sistem</p>
+                <h1 class="page-title">Department Management</h1>
+                <p class="page-subtitle">Manage departments available in the system</p>
             </div>
             <button onclick="openAddModal()" class="btn btn-primary">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Tambah Departemen
+                Add Department
             </button>
         </div>
     </div>
@@ -20,22 +20,22 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Nama Departemen</th>
-                        <th>Jumlah Pengguna</th>
+                        <th>Department Name</th>
+                        <th>User Count</th>
                         <th>Status</th>
-                        <th>Aksi</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($departments as $dept)
                         <tr>
                             <td style="font-weight:600;">{{ $dept->name }}</td>
-                            <td>{{ $dept->users_count }} pengguna</td>
+                            <td>{{ $dept->users_count }} users</td>
                             <td>
                                 @if($dept->is_active)
-                                    <span class="badge badge-resolved">Aktif</span>
+                                    <span class="badge badge-resolved">Active</span>
                                 @else
-                                    <span class="badge badge-closed">Nonaktif</span>
+                                    <span class="badge badge-closed">Inactive</span>
                                 @endif
                             </td>
                             <td>
@@ -45,34 +45,41 @@
                                             class="btn btn-secondary btn-sm">Edit</button>
 
                                     {{-- Toggle --}}
-                                    <form method="POST" action="{{ route('supervisor.departments.toggle', $dept) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit"
+                                    <form method="POST" action="{{ route('supervisor.departments.toggle', $dept) }}"
+                                        id="toggleDept{{ $dept->id }}">
+                                        @csrf @method('PATCH')
+                                        <button type="button"
                                                 class="btn btn-sm {{ $dept->is_active ? 'btn-warning' : 'btn-success' }}"
-                                                onclick="return confirm('{{ $dept->is_active ? 'Nonaktifkan' : 'Aktifkan' }} departemen ini?')">
-                                            {{ $dept->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                                onclick="showConfirmModal({
+                                                    title: '{{ $dept->is_active ? 'Deactivate' : 'Activate' }} Department',
+                                                    desc: 'Are you sure you want to {{ $dept->is_active ? 'deactivate' : 'activate' }} {{ addslashes($dept->name) }}?',
+                                                    btnText: '{{ $dept->is_active ? 'Deactivate' : 'Activate' }}',
+                                                    btnClass: '{{ $dept->is_active ? 'btn-warning' : 'btn-success' }}',
+                                                    icon: '{{ $dept->is_active ? '⚠️' : '✅' }}',
+                                                    type: '{{ $dept->is_active ? 'warning' : 'info' }}',
+                                                    action: () => document.getElementById('toggleDept{{ $dept->id }}').submit()
+                                                })">
+                                            {{ $dept->is_active ? 'Deactivate' : 'Activate' }}
                                         </button>
                                     </form>
 
                                     {{-- Hapus --}}
-                                    @if($dept->users_count === 0)
-                                        <form method="POST" action="{{ route('supervisor.departments.destroy', $dept) }}"
-                                            id="deleteDept{{ $dept->id }}">
-                                            @csrf @method('DELETE')
-                                            <button type="button" class="btn btn-danger btn-sm"
-                                                    onclick="confirmDelete('deleteDept{{ $dept->id }}', '{{ $dept->name }}')">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <form method="POST"
+                                        action="{{ route('supervisor.departments.destroy', $dept) }}"
+                                        id="deleteDept{{ $dept->id }}">
+                                        @csrf @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="confirmDelete('deleteDept{{ $dept->id }}', '{{ addslashes($dept->name) }}')">
+                                            Hapus
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="4">
-                                <x-ui.empty-state title="Belum ada departemen" description="Tambahkan departemen pertama." />
+                                <x-ui.empty-state title="No departments available" description="Add your first department." />
                             </td>
                         </tr>
                     @endforelse
@@ -90,24 +97,24 @@
     <div class="quick-modal-overlay" id="addModalOverlay">
         <div class="quick-modal" style="max-width:420px;">
             <div class="quick-modal-header">
-                <span class="quick-modal-title">Tambah Departemen</span>
+                <span class="quick-modal-title">Add Department</span>
                 <button class="quick-modal-close" onclick="closeAddModal()">✕</button>
             </div>
             <form method="POST" action="{{ route('supervisor.departments.store') }}">
                 @csrf
                 <div class="quick-modal-body">
                     <div class="form-group">
-                        <label class="form-label required">Nama Departemen</label>
+                        <label class="form-label required">Department Name</label>
                         <input type="text" name="name" class="form-control"
-                               placeholder="Contoh: Finance" required>
+                               placeholder="Example: HR" required>
                         @error('name')
                             <span class="form-error">{{ $message }}</span>
                         @enderror
                     </div>
                 </div>
                 <div class="quick-modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
@@ -117,7 +124,7 @@
     <div class="quick-modal-overlay" id="editModalOverlay">
         <div class="quick-modal" style="max-width:420px;">
             <div class="quick-modal-header">
-                <span class="quick-modal-title">Edit Departemen</span>
+                <span class="quick-modal-title">Edit Department</span>
                 <button class="quick-modal-close" onclick="closeEditModal()">✕</button>
             </div>
             <form method="POST" id="editDeptForm">
@@ -125,14 +132,14 @@
                 @method('PATCH')
                 <div class="quick-modal-body">
                     <div class="form-group">
-                        <label class="form-label required">Nama Departemen</label>
+                        <label class="form-label required">Department Name</label>
                         <input type="text" name="name" id="editDeptName"
                                class="form-control" required>
                     </div>
                 </div>
                 <div class="quick-modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>

@@ -35,7 +35,7 @@ class LoginRequest extends FormRequest
         if (!$user || !\Illuminate\Support\Facades\Hash::check($this->password, $user->password)) {
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'username' => 'Username atau password salah.',
+                'username' => 'Username or password is incorrect.',
             ]);
         }
 
@@ -44,7 +44,7 @@ class LoginRequest extends FormRequest
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'username' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
+                'username' => 'Your account has been deactivated. Please contact the IT Support.',
             ]);
         }
 

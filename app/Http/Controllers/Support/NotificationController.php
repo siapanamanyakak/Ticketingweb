@@ -22,13 +22,13 @@ class NotificationController extends Controller
     public function markAllRead()
     {
         auth()->user()->unreadNotifications->markAsRead();
-        return back()->with('success', 'Semua notifikasi telah ditandai sudah dibaca!');
+        return back()->with('success', 'All Notifications marked as read!');
     }
 
     public function deleteRead()
     {
         auth()->user()->readNotifications()->delete();
-        return back()->with('success', 'Notifikasi yang sudah dibaca berhasil dihapus!');
+        return back()->with('success', 'Read notifications successfully deleted!');
     }
 
     public function readAndRedirect(string $id)
@@ -37,10 +37,16 @@ class NotificationController extends Controller
 
         if ($notif) {
             $notif->markAsRead();
-            $url = $notif->data['url'] ?? route('support.tickets.index');
-            return redirect($url);
+
+            $ticketId = $notif->data['ticket_id'] ?? null;
+
+            if ($ticketId) {
+                return redirect()->route('support.tickets.show', $ticketId);
+            }
+
+            return redirect()->route('support.tickets.index');
         }
 
-        return redirect()->route('support.tickets.index');
+        return redirect()->back();
     }
 }

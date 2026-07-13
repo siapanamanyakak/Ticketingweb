@@ -4,28 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
-    'name',
-    'description',
-    'base_priority',
-    'max_priority',
-    'is_active',
-];
+        'name',
+        'description',
+        'base_priority',
+        'max_priority',
+        'is_active',
+    ];
 
-    protected $casts = ['is_active' => 'boolean'];
+    public function keywords()
+    {
+        return $this->hasMany(CategoryKeyword::class);
+    }
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class);
+        return $this->hasMany(Ticket::class)->withTrashed();
     }
-    public function keywords()
-    {
-    return $this->hasMany(CategoryKeyword::class);
-    }
-
 }

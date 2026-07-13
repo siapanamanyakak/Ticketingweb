@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 class ResumeSlaSchedule extends Command
 {
     protected $signature   = 'sla:resume-schedule';
-    protected $description = 'Auto-resume SLA dan kirim warning notifikasi';
+    protected $description = 'Auto-resume SLA and send SLA warning notifications for tickets nearing SLA breach.';
 
     public function handle(SlaService $slaService): void
     {
@@ -24,7 +24,7 @@ class ResumeSlaSchedule extends Command
     private function resumeOutsideWorkingHours(SlaService $slaService): void
     {
         if (!$slaService->isWorkingHours()) {
-            $this->info('Bukan jam kerja, skip resume.');
+            $this->info('Not in working hours. Skipping SLA resume.');
             return;
         }
 
@@ -34,7 +34,7 @@ class ResumeSlaSchedule extends Command
             ->get();
 
         if ($activePauses->isEmpty()) {
-            $this->info('Tidak ada SLA yang perlu di-resume.');
+            $this->info('No active SLA pauses found for outside working hours.');
             return;
         }
 
@@ -56,7 +56,7 @@ class ResumeSlaSchedule extends Command
 
     private function checkSlaWarnings(): void
     {
-        // Ambil semua tiket aktif yang punya SLA record
+
         $tickets = Ticket::whereNotIn('status', ['resolved', 'closed'])
             ->whereHas('slaRecord')
             ->with(['slaRecord', 'priority'])
@@ -78,12 +78,12 @@ class ResumeSlaSchedule extends Command
 
             // ── Response Warning ──────────────────────
             if (!$slaRecord->response_met_at && $slaRecord->response_deadline) {
-                $warningMinutes  = $sla->response_time * 0.10;
+                // Bulatkan hasil 10% ke menit terdekat.
+                // max(1, ...) memastikan batas warning minimal adalah 1 menit (tidak boleh 0)
+                $warningMinutes   = max(1, round($sla->response_time * 0.10));
                 $remainingMinutes = now()->diffInMinutes($slaRecord->response_deadline, false);
 
-                // Sisa waktu dalam window warning (positif = belum breach)
                 if ($remainingMinutes > 0 && $remainingMinutes <= $warningMinutes) {
-                    // Cek apakah warning sudah pernah dikirim (pakai notifications table)
                     $alreadySent = $recipients->first()?->notifications()
                         ->where('data->type', 'sla_warning_response')
                         ->where('data->ticket_id', $ticket->id)
@@ -100,7 +100,8 @@ class ResumeSlaSchedule extends Command
 
             // ── Resolution Warning ────────────────────
             if (!$slaRecord->resolution_met_at && $slaRecord->resolution_deadline) {
-                $warningMinutes   = $sla->resolution_time * 0.10;
+                // Bulatkan hasil 10% ke menit terdekat
+                $warningMinutes   = max(1, round($sla->resolution_time * 0.10));
                 $remainingMinutes = now()->diffInMinutes($slaRecord->resolution_deadline, false);
 
                 if ($remainingMinutes > 0 && $remainingMinutes <= $warningMinutes) {

@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -23,8 +25,10 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
+        $this->renderable(function (PostTooLargeException $e, $request) {
+        return back()->withErrors([
+            'attachment' => 'File is too large. Maximum size is 5MB.'
+        ])->withInput();
+    });
     }
 }

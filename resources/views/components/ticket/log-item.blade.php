@@ -2,10 +2,10 @@
 
 @php
 $actionLabels = [
-    'status'   => 'Status Diperbarui',
-    'comment'  => 'Komentar Ditambahkan',
-    'priority' => 'Prioritas Diperbarui',
-    'category' => 'Kategori Diperbarui'
+    'status'   => 'Status Updated',
+    'comment'  => 'Comment Added',
+    'priority' => 'Priority Updated',
+    'category' => 'Category Updated',
 ];
 
 $actionIcons = [
@@ -88,7 +88,7 @@ $afterStyle  = $colorMap[$log->status_after]  ?? ['bg' => '#f3f4f6', 'color' => 
         <div class="log-item-time">
             {{ $log->created_at->format('d M Y, H:i') }} · {{ $log->updatedBy->name }}
             @if($hasNote || $log->field_changed !== 'comment')
-                <span style="color:var(--navy-400); font-size:10px;"> · Klik untuk detail</span>
+                <span style="color:var(--navy-400); font-size:10px;"> · Click for details</span>
             @endif
         </div>
     </div>

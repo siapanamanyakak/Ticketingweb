@@ -28,6 +28,6 @@ class WorkScheduleController extends Controller
             'is_working_day' => $request->boolean('is_working_day'),
         ]);
 
-        return back()->with('success', 'Jadwal kerja berhasil diperbarui!');
+        return back()->with('success', 'Work schedule updated successfully!');
     }
 }

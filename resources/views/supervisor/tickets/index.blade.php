@@ -1,9 +1,9 @@
-<x-layout.app title="Semua Tiket" pageTitle="Semua Tiket">
+<x-layout.app title="Ticket List" pageTitle="Ticket List">
 
     <div class="page-header">
         <div>
-            <h1 class="page-title">Semua Tiket</h1>
-            <p class="page-subtitle">Pantau seluruh tiket yang masuk ke sistem</p>
+            <h1 class="page-title">Ticket List</h1>
+            <p class="page-subtitle">Monitor all tickets that come into the system</p>
         </div>
     </div>
 
@@ -20,17 +20,8 @@
                                value="{{ request('search') }}">
                     </div>
 
-                    <select name="status" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Status</option>
-                        <option value="open"        {{ request('status') === 'open'        ? 'selected' : '' }}>Open</option>
-                        <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="pending"     {{ request('status') === 'pending'     ? 'selected' : '' }}>Pending</option>
-                        <option value="resolved"    {{ request('status') === 'resolved'    ? 'selected' : '' }}>Resolved</option>
-                        <option value="closed"      {{ request('status') === 'closed'      ? 'selected' : '' }}>Closed</option>
-                    </select>
-
                     <select name="priority" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Prioritas</option>
+                        <option value="">All Priorities</option>
                         <option value="low"      {{ request('priority') === 'low'      ? 'selected' : '' }}>Low</option>
                         <option value="medium"   {{ request('priority') === 'medium'   ? 'selected' : '' }}>Medium</option>
                         <option value="high"     {{ request('priority') === 'high'     ? 'selected' : '' }}>High</option>
@@ -38,7 +29,7 @@
                     </select>
 
                     <select name="category" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Kategori</option>
+                        <option value="">All Categories</option>
                         @foreach(\App\Models\Category::where('is_active', true)->get() as $cat)
                             <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
                                 {{ $cat->name }}
@@ -50,7 +41,7 @@
                         <a href="{{ route('supervisor.tickets.index') }}" class="btn btn-secondary btn-sm">Reset</a>
                     @endif
 
-                    <button type="submit" class="btn btn-primary btn-sm">Cari</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
                 </div>
             </form>
         </div>
@@ -59,7 +50,7 @@
 @php
     $activeTab = request('tab', 'all');
     $tabs = [
-        'all'         => ['label' => 'Semua Aktif',  'count' => $totalActive],
+        'all'         => ['label' => 'All Active',  'count' => $totalActive],
         'open'        => ['label' => 'Open',          'count' => $tabCounts['open'] ?? 0],
         'in_progress' => ['label' => 'In Progress',   'count' => $tabCounts['in_progress'] ?? 0],
         'pending'     => ['label' => 'Pending',       'count' => $tabCounts['pending'] ?? 0],
@@ -84,10 +75,10 @@
             <form method="GET">
                 <input type="hidden" name="tab" value="closed">
                 <div class="filters-bar">
-                    <span style="font-size:12px; font-weight:600; color:var(--gray-500);">Filter Riwayat:</span>
+                    <span style="font-size:12px; font-weight:600; color:var(--gray-500);">Filter History:</span>
 
                     <select name="year" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Tahun</option>
+                        <option value="">All Years</option>
                         @foreach($availableYears as $year)
                             <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
                                 {{ $year }}
@@ -96,7 +87,7 @@
                     </select>
 
                     <select name="month" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Bulan</option>
+                        <option value="">All Months</option>
                         @foreach(range(1, 12) as $month)
                             <option value="{{ $month }}" {{ request('month') == $month ? 'selected' : '' }}>
                                 {{ \Carbon\Carbon::create()->month($month)->format('F') }}
@@ -105,7 +96,7 @@
                     </select>
 
                     <select name="day" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Hari</option>
+                        <option value="">All Days</option>
                         @foreach(range(1, 31) as $day)
                             <option value="{{ $day }}" {{ request('day') == $day ? 'selected' : '' }}>
                                 {{ $day }}
@@ -132,8 +123,8 @@
     @else
         <div class="card">
             <x-ui.empty-state
-                title="Tidak ada tiket"
-                description="Tidak ada tiket yang sesuai dengan filter yang dipilih."
+                title="No tickets found"
+                description="No tickets match the selected filter."
             />
         </div>
     @endif

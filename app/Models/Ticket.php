@@ -57,12 +57,12 @@ class Ticket extends Model
     // ── Relationships ─────────────────────────────
     public function reporter()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id')->withTrashed();
     }
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class)->withTrashed();
     }
 
     public function priority()

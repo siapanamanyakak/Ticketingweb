@@ -1,4 +1,4 @@
-<x-layout.app title="Detail Tiket" pageTitle="Detail Tiket">
+<x-layout.app title="Ticket Details" pageTitle="Ticket Details">
 
     <div class="page-header">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -6,7 +6,7 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Kembali
+                Back
             </a>
             <div>
                 <h1 class="page-title">{{ $ticket->ticket_number }}</h1>
@@ -33,23 +33,23 @@
 
                 <div class="ticket-timeline">
                     <div class="timeline-item">
-                        <span class="timeline-label">Dilaporkan</span>
+                        <span class="timeline-label">Reported</span>
                         <span class="timeline-value">{{ $ticket->created_at->format('d M Y, H:i') }}</span>
                     </div>
                     <div class="timeline-item">
-                        <span class="timeline-label">Direspon</span>
+                        <span class="timeline-label">Responded</span>
                         <span class="timeline-value {{ !$ticket->first_response_at ? 'empty' : '' }}">
                             {{ $ticket->first_response_at?->format('d M Y, H:i') ?? '—' }}
                         </span>
                     </div>
                     <div class="timeline-item">
-                        <span class="timeline-label">Diselesaikan</span>
+                        <span class="timeline-label">Resolved</span>
                         <span class="timeline-value {{ !$ticket->resolved_at ? 'empty' : '' }}">
                             {{ $ticket->resolved_at?->format('d M Y, H:i') ?? '—' }}
                         </span>
                     </div>
                     <div class="timeline-item">
-                        <span class="timeline-label">Ditutup</span>
+                        <span class="timeline-label">Closed</span>
                         <span class="timeline-value {{ !$ticket->closed_at ? 'empty' : '' }}">
                             {{ $ticket->closed_at?->format('d M Y, H:i') ?? '—' }}
                         </span>
@@ -74,7 +74,7 @@
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                                 </svg>
-                                Lihat Lampiran
+                                View Attachment
                             </a>
                         @endif
                     </div>
@@ -84,7 +84,7 @@
         {{-- Comments --}}
         <div class="comments-section" style="margin-bottom:0;">
             <div class="comments-title">
-                💬 Komentar ({{ $ticket->comments->whereNull('parent_id')->count() }})
+                💬 Comments ({{ $ticket->comments->whereNull('parent_id')->count() }})
             </div>
 
             {{-- Scrollable list --}}
@@ -95,7 +95,7 @@
                     @endforeach
                 @else
                     <p style="font-size:13px; color:var(--gray-400); text-align:center; padding:20px 0;">
-                        Belum ada komentar.
+                        No comments yet.
                     </p>
                 @endif
             </div>
@@ -106,10 +106,10 @@
                     <form method="POST" action="{{ route('user.tickets.comments.store', $ticket) }}">
                         @csrf
                         <textarea name="comment"
-                                placeholder="Tulis komentar atau update informasi ke pelapor..."
+                                placeholder="Write a comment or update information for the reporter..."
                                 required></textarea>
                         <div class="comment-form-footer">
-                            <button type="submit" class="btn btn-primary btn-sm">Kirim Komentar</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Send Comment</button>
                         </div>
                     </form>
                 </div>
@@ -124,32 +124,32 @@
             {{-- SLA Info --}}
             @if($ticket->slaRecord)
                 <div class="panel-card">
-                    <div class="panel-card-title">⏱ Status SLA</div>
-                    <x-ui.sla-timer :ticket="$ticket" />
+                    <div class="panel-card-title">⏱ SLA Details</div>
+                    <x-ui.sla-timer :ticket="$ticket" :timeData="$slaRemaining" />
                     <div style="margin-top:12px;">
                         <div class="panel-row">
-                            <span class="panel-row-label">Deadline Respon</span>
+                            <span class="panel-row-label">Response Deadline</span>
                             <span class="panel-row-value" style="font-size:11px;">
                                 {{ $ticket->slaRecord->response_deadline?->format('d M, H:i') ?? '—' }}
                             </span>
                         </div>
                         <div class="panel-row">
-                            <span class="panel-row-label">Deadline Selesai</span>
+                            <span class="panel-row-label">Resolution Deadline</span>
                             <span class="panel-row-value" style="font-size:11px;">
                                 {{ $ticket->slaRecord->resolution_deadline?->format('d M, H:i') ?? '—' }}
                             </span>
                         </div>
                         <div class="panel-row">
-                            <span class="panel-row-label">Status Respon</span>
+                            <span class="panel-row-label">Response Status</span>
                             <span class="panel-row-value">
                                 @if($ticket->slaRecord->response_met_at)
                                     @if($ticket->slaRecord->response_breached)
-                                        <span style="color:#dc2626; font-size:11px;">Terlambat</span>
+                                        <span style="color:#dc2626; font-size:11px;">Late</span>
                                     @else
-                                        <span style="color:#16a34a; font-size:11px;">Tepat Waktu</span>
+                                        <span style="color:#16a34a; font-size:11px;">On Time</span>
                                     @endif
                                 @else
-                                    <span style="color:#d97706; font-size:11px;">Menunggu</span>
+                                    <span style="color:#d97706; font-size:11px;">Wait For Response</span>
                                 @endif
                             </span>
                         </div>
@@ -159,17 +159,17 @@
 
             {{-- Info Tiket --}}
             <div class="panel-card">
-                <div class="panel-card-title">📋 Info Tiket</div>
+                <div class="panel-card-title">📋 Ticket Information</div>
                 <div class="panel-row">
-                    <span class="panel-row-label">Nomor</span>
+                    <span class="panel-row-label">Number</span>
                     <span class="panel-row-value">{{ $ticket->ticket_number }}</span>
                 </div>
                 <div class="panel-row">
-                    <span class="panel-row-label">Kategori</span>
+                    <span class="panel-row-label">Category</span>
                     <span class="panel-row-value">{{ $ticket->category?->name ?? '—' }}</span>
                 </div>
                 <div class="panel-row">
-                    <span class="panel-row-label">Prioritas</span>
+                    <span class="panel-row-label">Priority</span>
                     <span class="panel-row-value">
                         <x-ui.badge-priority :priority="$ticket->priority?->level ?? 'low'" />
                     </span>
@@ -182,7 +182,7 @@
                 </div>
                 @if($ticket->had_pending)
                     <div class="panel-row">
-                        <span class="panel-row-label">Pernah Pending</span>
+                        <span class="panel-row-label">Has Been Pending</span>
                         <span class="panel-row-value" style="color:#d97706;">
                             {{ $ticket->pending_count }}x
                         </span>
@@ -193,7 +193,7 @@
             {{-- Riwayat --}}
             <div class="panel-card">
                 <div class="panel-card-title">
-                    📜 Log ({{ $ticket->logs->count() }}x perubahan)
+                    📜 Log ({{ $ticket->logs->count() }}x changes)
                 </div>
 
                 @if($ticket->logs->count() > 0)
@@ -201,13 +201,16 @@
                     <div class="ticket-log-scrollable">
                         <div class="ticket-log">
                             @foreach($ticket->logs->sortByDesc('created_at') as $log)
-                                <x-ticket.log-item :log="$log" :canViewNote="true" />
+                                <x-ticket.log-item
+                                    :log="$log"
+                                    :canViewNote="auth()->user()->role === 'it_support'"
+                                />
                             @endforeach
                         </div>
                     </div>
                 @else
                     <p style="font-size:12px; color:var(--gray-400); text-align:center; padding:12px 0;">
-                        Belum ada riwayat.
+                        No history yet.
                     </p>
                 @endif
             </div>

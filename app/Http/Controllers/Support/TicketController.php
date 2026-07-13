@@ -8,6 +8,7 @@ use App\Models\TicketLog;
 use App\Services\SlaService;
 use Illuminate\Http\Request;
 use App\Services\AutoCategoryService;
+use Illuminate\Validation\Rule;
 
 
 class TicketController extends Controller
@@ -131,8 +132,8 @@ public function store(Request $request, SlaService $slaService, AutoCategoryServ
     'status_before' => null,
     'status_after'  => 'open',
     'note'          => auth()->id() === (int)$validated['user_id']
-                        ? 'Tiket dibuat oleh IT Support (pencatatan mandiri)'
-                        : 'Tiket dibuat oleh IT Support atas nama ' . $ticket->reporter->name,
+                        ? 'Ticket created by IT support for self reporting'
+                        : 'Ticket created by IT Support for ' . $ticket->reporter->name,
     'visibility'    => 'all',
     ]);
 
@@ -161,7 +162,7 @@ public function store(Request $request, SlaService $slaService, AutoCategoryServ
         session()->flash('outside_working_hours', $ticket->ticket_number);
     }
 
-    return back()->with('success', 'Tiket berhasil dibuat! Nomor: ' . $ticket->ticket_number);
+    return back()->with('success', 'Ticket successfully created! Number: ' . $ticket->ticket_number);
 }
 
 public function history(Request $request)
@@ -213,99 +214,112 @@ public function history(Request $request)
     return view('support.tickets.history', compact('tickets', 'availableYears'));
 }
 
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket, SlaService $slaService)
     {
         $ticket->load(['reporter', 'category', 'priority', 'slaRecord', 'slaPauses', 'comments.user', 'logs.updatedBy']);
 
-        return view('support.tickets.show', compact('ticket'));
+        $slaRemaining = null;
+
+        if ($ticket->slaRecord) {
+            $phase = $ticket->first_response_at ? 'resolution' : 'response';
+            $deadline = $phase === 'response'
+                ? $ticket->slaRecord->response_deadline
+                : $ticket->slaRecord->resolution_deadline;
+
+            $slaRemaining = [
+                'total_remaining_minutes' => $slaService->getRemainingWorkingMinutes($ticket, $phase),
+                'total_sla_minutes'       => $slaService->getTotalSlaMinutes($ticket, $phase),
+                'is_breached'             => $deadline ? now()->gte($deadline) : false,
+            ];
+        }
+
+        // Tambahkan 'slaRemaining' ke dalam compact
+        return view('support.tickets.show', compact('ticket', 'slaRemaining'));
     }
 
     public function updateStatus(Request $request, Ticket $ticket, SlaService $slaService)
     {
+
+
         $request->validate([
-            'status' => 'required|in:in_progress,pending,resolved,closed',
-            'note'   => 'nullable|string',
+            'status'           => 'required|in:in_progress,pending,resolved,closed',
+            'note'             => 'nullable|string',
+            'resolution_notes' => 'nullable|string',
         ]);
 
         $oldStatus = $ticket->status;
         $newStatus = $request->status;
 
+
+        if ($oldStatus === 'pending' && in_array($newStatus, ['in_progress', 'resolved'])) {
+            $slaService->resumeSla($ticket);
+
+            if ($ticket->pending_at) {
+                $pendingDuration = $ticket->pending_at->diffInMinutes(now());
+                $ticket->update([
+                    'pending_duration' => $ticket->pending_duration + $pendingDuration,
+                    'pending_at'       => null,
+                ]);
+            }
+        }
+
         $updateData = ['status' => $newStatus];
 
-        // Handle first response
+        // ── Handle first response ─────────────────────
         if (!$ticket->first_response_at && $newStatus === 'in_progress') {
-        $updateData['first_response_at'] = now();
+            $updateData['first_response_at'] = now();
 
-        // Update SLA response met
-        $ticket->slaRecord?->update([
-            'response_met_at'   => now(),
-            'response_breached' => now()->gt($ticket->slaRecord->response_deadline),
-        ]);
+            $ticket->slaRecord?->update([
+                'response_met_at'   => now(),
+                'response_breached' => now()->gt($ticket->slaRecord->response_deadline),
+            ]);
         }
-        // Recalculate resolution deadline dari first_response_at
-    $sla = \App\Models\Sla::whereHas('priority', fn($q) => $q->where('id', $ticket->priority_id))->first();
-    if ($sla && $ticket->slaRecord) {
-        $resolutionDeadline = $slaService->calculateDeadline(now(), $sla->resolution_time);
-        $ticket->slaRecord->update([
-            'resolution_deadline' => $resolutionDeadline,
-        ]);
-    }
 
-
-        // Handle pending
+        // ── Handle pending ────────────────────────────
         if ($newStatus === 'pending') {
-            $updateData['had_pending']    = true;
-            $updateData['pending_at']     = now();
-            $updateData['pending_count']  = $ticket->pending_count + 1;
+            $updateData['had_pending']   = true;
+            $updateData['pending_at']    = now();
+            $updateData['pending_count'] = $ticket->pending_count + 1;
 
-            // Pause SLA
             $slaService->pauseSla($ticket, 'pending');
         }
 
-            // Handle resume dari pending
-            if ($oldStatus === 'pending' && $newStatus === 'in_progress') {
-                $slaService->resumeSla($ticket);
+        // ── Handle resolved ───────────────────────────
+        if ($newStatus === 'resolved') {
+            $updateData['resolved_at']      = now();
+            $updateData['resolution_notes'] = $request->resolution_notes;
 
-                if ($ticket->pending_at) {
-                    $pendingDuration = $ticket->pending_at->diffInMinutes(now());
-                    $updateData['pending_duration'] = $ticket->pending_duration + $pendingDuration;
-                }
-                $updateData['pending_at'] = null;
-            }
+            // Refresh slaRecord setelah resume (kalau dari pending)
+            $ticket->refresh();
+            $slaRecord = $ticket->slaRecord;
 
-            // Handle resolved — cek breach SEKARANG (bukan setelah resume)
-            if ($newStatus === 'resolved') {
-                $updateData['resolved_at'] = now();
-                $updateData['resolution_notes'] = $request->resolution_notes;
+            $isBreached      = $slaRecord ? now()->gt($slaRecord->resolution_deadline) : false;
+            $alreadyBreached = $slaRecord?->resolution_breached ?? false;
 
-                // Cek breach berdasarkan deadline SAAT INI (sudah di-extend kalau ada pause)
-                $isBreached = $ticket->slaRecord
-                    ? now()->gt($ticket->slaRecord->resolution_deadline)
-                    : false;
+            $slaRecord?->update([
+                'resolution_met_at'   => now(),
+                'resolution_breached' => $alreadyBreached || $isBreached,
+            ]);
+        }
 
-                // Kalau sudah breach sebelumnya, tetap breach
-                $alreadyBreached = $ticket->slaRecord?->resolution_breached ?? false;
-
-                $ticket->slaRecord?->update([
-                    'resolution_met_at'   => now(),
-                    'resolution_breached' => $alreadyBreached || $isBreached,
-                ]);
-            }
-
-        // Handle closed
+        // ── Handle closed ─────────────────────────────
         if ($newStatus === 'closed') {
             $updateData['closed_at'] = now();
         }
 
         $ticket->update($updateData);
 
-        // Catat log
+        // ── Catat log ─────────────────────────────────
         $visibility = match($newStatus) {
             'pending' => 'all',
-            default   => 'support_only',
+            'resolved' => 'support_only',
+            'closed' => 'support_only',
+            'in_progress' => 'support_only',
         };
 
-        $logNote = ($newStatus === 'resolved') ? ($request->resolution_notes ?? $request->note) : $request->note;
+        $logNote = $newStatus === 'resolved'
+            ? ($request->resolution_notes ?? $request->note)
+            : $request->note;
 
         TicketLog::create([
             'ticket_id'     => $ticket->id,
@@ -313,20 +327,22 @@ public function history(Request $request)
             'field_changed' => 'status',
             'status_before' => $oldStatus,
             'status_after'  => $newStatus,
-            'note'          => $request->note ?? null,
+            'note'          => $logNote,
             'visibility'    => $visibility,
         ]);
 
-        // Kirim notifikasi ke reporter
         $ticket->reporter->notify(new \App\Notifications\TicketStatusUpdated($ticket, $oldStatus));
 
-        return back()->with('success', 'Status tiket berhasil diperbarui!');
+        return back()->with('success', 'Ticket status updated successfully!');
     }
 
     public function updateCategory(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => [
+    'required',
+    Rule::exists('categories', 'id')->whereNull('deleted_at'),
+],
             'note'        => 'nullable|string',
         ]);
 
@@ -343,7 +359,7 @@ public function history(Request $request)
             'visibility'    => 'support_only',
         ]);
 
-        return back()->with('success', 'Kategori tiket berhasil diperbarui!');
+        return back()->with('success', 'Ticket category updated successfully!');
     }
 
     public function resolve(Request $request, Ticket $ticket, SlaService $slaService)
@@ -377,35 +393,35 @@ public function history(Request $request)
 
         $ticket->reporter->notify(new \App\Notifications\TicketStatusUpdated($ticket, $oldStatus));
 
-        return back()->with('success', 'Tiket berhasil diselesaikan!');
+        return back()->with('success', 'Ticket successfully resolved!');
     }
 
     public function updatePriority(Request $request, Ticket $ticket, SlaService $slaService)
-{
-    $request->validate([
-        'priority_id' => 'required|exists:priorities,id',
-        'note'        => 'nullable|string',
-    ]);
+    {
+        $request->validate([
+            'priority_id' => 'required|exists:priorities,id',
+            'note'        => 'nullable|string',
+        ]);
 
-    $oldPriority = $ticket->priority?->level;
+        $oldPriority = $ticket->priority?->level;
 
-    $ticket->update(['priority_id' => $request->priority_id]);
+        $ticket->update(['priority_id' => $request->priority_id]);
 
-    // Recalculate SLA berdasarkan priority baru
-    $slaService->recalculateSla($ticket->fresh());
+        // Recalculate SLA — Idempotent dari created_at
+        $slaService->recalculateSla($ticket->fresh());
 
-    TicketLog::create([
-        'ticket_id'     => $ticket->id,
-        'updated_by'    => auth()->id(),
-        'field_changed' => 'priority',
-        'status_before' => $oldPriority,
-        'status_after'  => $ticket->fresh()->priority?->level,
-        'note'          => $request->note ?? null,
-        'visibility'    => 'support_only',
-    ]);
+        TicketLog::create([
+            'ticket_id'     => $ticket->id,
+            'updated_by'    => auth()->id(),
+            'field_changed' => 'priority',
+            'status_before' => $oldPriority,
+            'status_after'  => $ticket->fresh()->priority?->level,
+            'note'          => $request->note ?? null,
+            'visibility'    => 'support_only',
+        ]);
 
-    return back()->with('success', 'Prioritas tiket berhasil diperbarui!');
-}
+        return back()->with('success', 'Ticket priority updated successfully!');
+    }
 }
 
 

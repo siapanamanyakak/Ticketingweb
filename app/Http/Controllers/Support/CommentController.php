@@ -28,12 +28,12 @@ class CommentController extends Controller
             'field_changed' => 'comment',
             'status_before' => null,
             'status_after'  => null,
-            'note'          => 'IT Support menambahkan komentar',
+            'note'          => 'IT Support commented on the ticket',
         ]);
 
         // Notifikasi ke reporter
         $ticket->reporter->notify(new \App\Notifications\NewCommentNotification($ticket, auth()->user()));
 
-        return back()->with('success', 'Komentar berhasil ditambahkan!');
+        return back()->with('success', 'Comment added successfully!');
     }
 }

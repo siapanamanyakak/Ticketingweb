@@ -1,16 +1,16 @@
-<x-layout.app title="Tiket Saya" pageTitle="Tiket Saya">
+<x-layout.app title="My Tickets" pageTitle="My Tickets">
 
     <div class="page-header">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
             <div>
-                <h1 class="page-title">Tiket Saya</h1>
-                <p class="page-subtitle">Daftar seluruh tiket yang pernah kamu buat</p>
+                <h1 class="page-title">My Tickets</h1>
+                <p class="page-subtitle">List of all tickets you have created</p>
             </div>
             <button onclick="openCreateTicketModal()" class="btn btn-primary">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
-    Buat Tiket Baru
+    Create New Ticket
 </button>
         </div>
     </div>
@@ -24,21 +24,13 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <input type="text" name="search" placeholder="Cari tiket..."
+                        <input type="text" name="search" placeholder="Search Ticket..."
                                value="{{ request('search') }}">
                     </div>
 
-                    <select name="status" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Status</option>
-                        <option value="open"        {{ request('status') === 'open'        ? 'selected' : '' }}>Open</option>
-                        <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="pending"     {{ request('status') === 'pending'     ? 'selected' : '' }}>Pending</option>
-                        <option value="resolved"    {{ request('status') === 'resolved'    ? 'selected' : '' }}>Resolved</option>
-                        <option value="closed"      {{ request('status') === 'closed'      ? 'selected' : '' }}>Closed</option>
-                    </select>
 
                     <select name="priority" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Prioritas</option>
+                        <option value="">All Priorities</option>
                         <option value="low"      {{ request('priority') === 'low'      ? 'selected' : '' }}>Low</option>
                         <option value="medium"   {{ request('priority') === 'medium'   ? 'selected' : '' }}>Medium</option>
                         <option value="high"     {{ request('priority') === 'high'     ? 'selected' : '' }}>High</option>
@@ -90,7 +82,7 @@
                     <span style="font-size:12px; font-weight:600; color:var(--gray-500);">Filter Riwayat:</span>
 
                     <select name="year" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Tahun</option>
+                        <option value="">All Years</option>
                         @foreach($availableYears as $year)
                             <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
                                 {{ $year }}
@@ -99,7 +91,7 @@
                     </select>
 
                     <select name="month" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Bulan</option>
+                        <option value="">All Months</option>
                         @foreach(range(1, 12) as $month)
                             <option value="{{ $month }}" {{ request('month') == $month ? 'selected' : '' }}>
                                 {{ \Carbon\Carbon::create()->month($month)->format('F') }}
@@ -108,7 +100,7 @@
                     </select>
 
                     <select name="day" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Hari</option>
+                        <option value="">All Day</option>
                         @foreach(range(1, 31) as $day)
                             <option value="{{ $day }}" {{ request('day') == $day ? 'selected' : '' }}>
                                 {{ $day }}
@@ -137,15 +129,15 @@
 @else
     <div class="card">
         <x-ui.empty-state
-            title="Belum ada tiket"
-            description="Kamu belum pernah membuat tiket. Buat tiket pertamamu sekarang!"
+            title="No tickets yet"
+            description="You haven't created any tickets yet. Create your first ticket now!"
         >
-            {{-- Ini disebut Slot. Semua di dalam sini akan dikirim ke komponen --}}
+            {{-- This is called a Slot. All content inside will be passed to the component --}}
             <button onclick="openCreateTicketModal()" class="btn btn-primary">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20" style="display: inline-block; margin-right: 4px;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Buat Tiket Baru
+                Create New Ticket
             </button>
         </x-ui.empty-state>
     </div>
@@ -156,7 +148,7 @@
 <div class="quick-modal-overlay" id="createTicketOverlay">
     <div class="quick-modal" style="max-width:520px;">
         <div class="quick-modal-header">
-            <span class="quick-modal-title">🎫 Buat Tiket Baru</span>
+            <span class="quick-modal-title">🎫 Create New Ticket</span>
             <button class="quick-modal-close" onclick="closeCreateTicketModal()">✕</button>
         </div>
 
@@ -168,20 +160,20 @@
 
                 {{-- Judul --}}
                 <div class="form-group">
-                    <label class="form-label required">Judul Masalah</label>
+                    <label class="form-label required">Issue Title</label>
                     <input type="text" name="title" class="form-control"
-                           placeholder="Contoh: Komputer tidak bisa menyala"
+                           placeholder="Example: Computer won't turn on"
                            value="{{ old('title') }}" required>
                     @error('title')
                         <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
-                {{-- Deskripsi --}}
+                {{-- Description --}}
                 <div class="form-group">
-                    <label class="form-label required">Deskripsi Masalah</label>
+                    <label class="form-label required">Issue Description</label>
                     <textarea name="description" class="form-control" rows="4"
-                              placeholder="Jelaskan masalah kamu secara detail. Sistem akan otomatis menentukan kategori dan prioritas."
+                              placeholder="Explain your issue in detail. The system will automatically assign a category and priority based on your description."
                               required>{{ old('description') }}</textarea>
                     @error('description')
                         <span class="form-error">{{ $message }}</span>
@@ -191,12 +183,17 @@
                 {{-- Attachment --}}
                 <div class="form-group">
                     <label class="form-label">
-                        Lampiran
-                        <span style="font-size:10px; color:var(--gray-400); font-weight:400;">(opsional)</span>
+                        Attachment
+                        <span style="font-size:10px; color:var(--gray-400); font-weight:400;">(optional)</span>
                     </label>
                     <input type="file" name="attachment" class="form-control"
                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
-                    <span class="form-hint">Format: JPG, PNG, PDF, DOC. Maksimal 2MB.</span>
+                    <span class="form-hint">Format: JPG, PNG, PDF, DOC. Maximum 2MB.</span>
+                    @error('attachment')
+                    <span class="form-error" style="color:#dc2626; font-size:12px; font-weight:600; display:block; margin-top:4px;">
+                        ⚠️ {{ $message }}
+                    </span>
+    @enderror
                 </div>
 
                 {{-- Info --}}
@@ -205,16 +202,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span>Kategori dan prioritas akan ditentukan otomatis oleh sistem.</span>
+                    <span>Category and priority will be automatically assigned by the system.</span>
                 </div>
 
             </div>
 
             <div class="quick-modal-footer">
                 <button type="button" class="btn btn-secondary"
-                        onclick="closeCreateTicketModal()">Batal</button>
+                        onclick="closeCreateTicketModal()">Cancel</button>
                 <button type="submit" class="btn btn-primary">
-                    Kirim Tiket
+                    Create Ticket
                 </button>
             </div>
         </form>

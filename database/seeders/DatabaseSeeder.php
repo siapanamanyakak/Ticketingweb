@@ -15,8 +15,9 @@ class DatabaseSeeder extends Seeder
             SlaSeeder::class,
             WorkScheduleSeeder::class,
             UserSeeder::class,
-            CategoryKeywordSeeder::class,
-            PriorityKeywordSeeder::class,
+            FullKeywordSeeder::class,
+            // CategoryKeywordSeeder::class,
+            // PriorityKeywordSeeder::class,
         ]);
     }
 }

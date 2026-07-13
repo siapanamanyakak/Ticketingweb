@@ -13,7 +13,7 @@ class CheckRole
     // Belum login → mental ke login
     if (!auth()->check()) {
         return redirect()->route('login')
-            ->with('error', 'Silakan login terlebih dahulu.');
+            ->with('error', 'Please log in first.');
     }
 
     // Sudah login tapi role salah → kembalikan ke homepage role sendiri
@@ -25,7 +25,7 @@ class CheckRole
         };
 
         return redirect($fallback)
-            ->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk halaman tersebut.');
+            ->with('error', 'Access denied. You do not have permission to view that page.');
     }
 
     return $next($request);

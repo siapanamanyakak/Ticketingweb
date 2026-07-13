@@ -105,11 +105,11 @@ class ReportController extends Controller
     // ── Buat Spreadsheet ──────────────────────
     $spreadsheet = new Spreadsheet();
     $sheet       = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('Laporan IT Helpdesk');
+    $sheet->setTitle('IT Helpdesk Reports');
 
     // ── Header Judul ──────────────────────────
     $sheet->mergeCells('A1:I1');
-    $sheet->setCellValue('A1', 'LAPORAN LAYANAN IT HELPDESK — KTU SHIPYARD');
+    $sheet->setCellValue('A1', 'IT HELPDESK REPORTS — KTU SHIPYARD');
     $sheet->getStyle('A1')->applyFromArray([
         'font'      => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
         'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0F2044']],
@@ -127,18 +127,18 @@ class ReportController extends Controller
     ]);
 
     // ── Summary ───────────────────────────────
-    $sheet->setCellValue('A4', 'RINGKASAN');
+    $sheet->setCellValue('A4', 'SUMMARY');
     $sheet->getStyle('A4')->getFont()->setBold(true);
 
     $summaryData = [
-        ['Total Tiket',       $summary['total']],
-        ['Diselesaikan',      $summary['resolved']],
-        ['SLA Terpenuhi',     $summary['sla_met']],
-        ['SLA Terlewat',      $summary['sla_breached']],
-        ['Ada Pending',       $summary['with_pending']],
-        ['Tanpa Pending',     $summary['without_pending']],
+        ['Total Tickets',       $summary['total']],
+        ['Resolved',      $summary['resolved']],
+        ['SLA Fulfilled',     $summary['sla_met']],
+        ['SLA Breached',      $summary['sla_breached']],
+        ['Pending',       $summary['with_pending']],
+        ['Without Pending',     $summary['without_pending']],
         ['Compliance Rate',   $summary['compliance_rate'] . '%'],
-        ['Rata-rata Selesai', $summary['avg_resolution']],
+        ['Average Resolution Time', $summary['avg_resolution']],
     ];
 
     $row = 5;
@@ -152,7 +152,7 @@ class ReportController extends Controller
 
     // ── Header Tabel ─────────────────────────
     $headerRow = $row + 1;
-    $headers   = ['No. Tiket', 'Pelapor', 'Departemen', 'Kategori', 'Prioritas', 'Status', 'SLA', 'Pending', 'Dibuat', 'Diselesaikan'];
+    $headers   = ['No. Ticket', 'Reporter', 'Department', 'Category', 'Priority', 'Status', 'SLA', 'Pending', 'Created', 'Resolved'];
     $cols      = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
     // Extend merge untuk 10 kolom
@@ -176,9 +176,9 @@ class ReportController extends Controller
         // SLA status
         $slaStatus = '—';
         if ($ticket->slaRecord) {
-            if ($ticket->slaRecord->resolution_breached)  $slaStatus = 'Terlewat';
-            elseif ($ticket->slaRecord->resolution_met_at) $slaStatus = 'Tepat Waktu';
-            else                                           $slaStatus = 'Berjalan';
+            if ($ticket->slaRecord->resolution_breached)  $slaStatus = 'Breached';
+            elseif ($ticket->slaRecord->resolution_met_at) $slaStatus = 'Fulfilled';
+            else                                           $slaStatus = 'In Progress';
         }
 
         $sheet->setCellValue('A' . $dataRow, $ticket->ticket_number);
@@ -200,12 +200,12 @@ class ReportController extends Controller
         }
 
         // Warna SLA breach
-        if ($slaStatus === 'Terlewat') {
+        if ($slaStatus === 'Breached') {
             $sheet->getStyle('G' . $dataRow)
                   ->getFont()->getColor()->setRGB('DC2626');
             $sheet->getStyle('G' . $dataRow)
                   ->getFont()->setBold(true);
-        } elseif ($slaStatus === 'Tepat Waktu') {
+        } elseif ($slaStatus === 'Fulfilled') {
             $sheet->getStyle('G' . $dataRow)
                   ->getFont()->getColor()->setRGB('16A34A');
         }

@@ -1,10 +1,10 @@
-<x-layout.app title="Laporan" pageTitle="Laporan Layanan IT">
+<x-layout.app title="Reports" pageTitle="Reports IT">
 
     <div class="page-header">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
             <div>
-                <h1 class="page-title">Laporan Layanan IT</h1>
-                <p class="page-subtitle">Evaluasi kinerja operasional IT Helpdesk</p>
+                <h1 class="page-title">Reports</h1>
+                <p class="page-subtitle">Evaluation performance operational IT Helpdesk</p>
             </div>
             <div style="display:flex; gap:8px;">
                 <a href="{{ route('supervisor.reports.export-pdf', array_merge(request()->query(), ['filter_type' => $filterType, 'start_date' => $startDate, 'end_date' => $endDate])) }}"
@@ -34,12 +34,12 @@
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 @php
                     $quickFilters = [
-                        'this_week'  => 'Minggu Ini',
-                        'last_week'  => 'Minggu Lalu',
-                        'this_month' => 'Bulan Ini',
-                        'last_month' => 'Bulan Lalu',
-                        'this_year'  => 'Tahun Ini',
-                        'last_year'  => 'Tahun Lalu',
+                        'this_week'  => 'This Week',
+                        'last_week'  => 'Last Week',
+                        'this_month' => 'This Month',
+                        'last_month' => 'Last Month',
+                        'this_year'  => 'This Year',
+                        'last_year'  => 'Last Year',
                         'custom'     => 'Custom',
                     ];
                 @endphp
@@ -56,14 +56,14 @@
             <div id="customDateRange"
                 style="display:{{ $filterType === 'custom' ? 'flex' : 'none' }};
                         align-items:center; gap:8px; flex-wrap:wrap;">
-                <label style="font-size:12px; font-weight:600; color:var(--gray-500);">Dari:</label>
+                <label style="font-size:12px; font-weight:600; color:var(--gray-500);">Start:</label>
                 <input type="date" name="start_date" class="form-control"
                     style="width:auto;" value="{{ $startDate }}">
-                <label style="font-size:12px; font-weight:600; color:var(--gray-500);">Sampai:</label>
+                <label style="font-size:12px; font-weight:600; color:var(--gray-500);">Until:</label>
                 <input type="date" name="end_date" class="form-control"
                     style="width:auto;" value="{{ $endDate }}">
                 <button type="submit" name="filter_type" value="custom"
-                        class="btn btn-primary btn-sm">Terapkan</button>
+                        class="btn btn-primary btn-sm">Apply</button>
             </div>
 
             {{-- Info periode aktif --}}
@@ -91,27 +91,27 @@
     <div class="report-summary-grid">
         <div class="report-summary-item">
             <div class="report-summary-value">{{ $summary['total'] }}</div>
-            <div class="report-summary-label">Total Tiket</div>
+            <div class="report-summary-label">Total Ticket</div>
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value" style="color:#16a34a;">{{ $summary['resolved'] }}</div>
-            <div class="report-summary-label">Diselesaikan</div>
+            <div class="report-summary-label">Resolved</div>
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value" style="color:#2563eb;">{{ $summary['sla_met'] }}</div>
-            <div class="report-summary-label">SLA Terpenuhi</div>
+            <div class="report-summary-label">SLA Fullfilled</div>
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value" style="color:#dc2626;">{{ $summary['sla_breached'] }}</div>
-            <div class="report-summary-label">SLA Terlewat</div>
+            <div class="report-summary-label">SLA Breached</div>
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value" style="color:#d97706;">{{ $summary['with_pending'] }}</div>
-            <div class="report-summary-label">Ada Pending</div>
+            <div class="report-summary-label">With Pending</div>
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value">{{ $summary['without_pending'] }}</div>
-            <div class="report-summary-label">Tanpa Pending</div>
+            <div class="report-summary-label">Without Pending</div>
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value" style="color:#2563eb;">{{ $summary['compliance_rate'] }}%</div>
@@ -119,28 +119,28 @@
         </div>
         <div class="report-summary-item">
             <div class="report-summary-value">{{ $summary['avg_resolution'] }}</div>
-            <div class="report-summary-label">Rata-rata Selesai</div>
+            <div class="report-summary-label">Average Resolution Time</div>
         </div>
     </div>
 
     {{-- Ticket Table --}}
     <div class="card">
         <div class="card-header">
-            <span class="card-title">Detail Tiket ({{ $tickets->total() }} tiket)</span>
+            <span class="card-title">Ticket Details ({{ $tickets->total() }} tiket)</span>
         </div>
         <div class="table-wrapper">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Nomor Tiket</th>
-                        <th>Pelapor</th>
-                        <th>Kategori</th>
-                        <th>Prioritas</th>
+                        <th>Ticket Number</th>
+                        <th>Reporter</th>
+                        <th>Category</th>
+                        <th>Priority</th>
                         <th>Status</th>
                         <th>SLA</th>
                         <th>Pending</th>
-                        <th>Dibuat</th>
-                        <th>Selesai</th>
+                        <th>Created</th>
+                        <th>Resolved</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -162,11 +162,11 @@
                             <td>
                                 @if($ticket->slaRecord)
                                     @if($ticket->slaRecord->resolution_breached)
-                                        <span class="badge badge-high">Terlewat</span>
+                                        <span class="badge badge-high">Breached</span>
                                     @elseif($ticket->slaRecord->resolution_met_at)
-                                        <span class="badge badge-resolved">Tepat Waktu</span>
+                                        <span class="badge badge-resolved">Fullfilled</span>
                                     @else
-                                        <span class="badge badge-pending">Berjalan</span>
+                                        <span class="badge badge-pending">In Progress</span>
                                     @endif
                                 @else
                                     <span style="color:var(--gray-400);">—</span>
@@ -190,8 +190,8 @@
                         <tr>
                             <td colspan="9">
                                 <x-ui.empty-state
-                                    title="Tidak ada data"
-                                    description="Tidak ada tiket pada periode yang dipilih."
+                                    title="There are no data"
+                                    description="There are no tickets for the selected period."
                                 />
                             </td>
                         </tr>

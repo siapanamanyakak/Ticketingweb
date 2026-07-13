@@ -17,10 +17,10 @@ class EmployeeImportController extends Controller
         // Download template Excel
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Template Import Karyawan');
+        $sheet->setTitle('Template Import Employee');
 
         // Header
-        $headers = ['Nama Lengkap', 'ID Staff', 'Departemen', 'Email (Opsional)'];
+        $headers = ['Full Name', 'NIK', 'Department', 'Email (Optional)'];
         foreach ($headers as $i => $header) {
             $col = chr(65 + $i); // A, B, C, D
             $sheet->setCellValue($col . '1', $header);
@@ -81,21 +81,21 @@ class EmployeeImportController extends Controller
 
             // Validasi nama & id_staff wajib
             if (empty($name) || empty($idStaff)) {
-                $errors[] = "Baris {$rowNum}: Nama dan ID Staff wajib diisi.";
+                $errors[] = "Row {$rowNum}: Full Name and NIK are required.";
                 $skipped++;
                 continue;
             }
 
             // Cek duplikat id_staff
             if (User::where('id_staff', $idStaff)->exists()) {
-                $errors[] = "Baris {$rowNum}: ID Staff '{$idStaff}' sudah terdaftar.";
+                $errors[] = "Row {$rowNum}: NIK '{$idStaff}' is already registered.";
                 $skipped++;
                 continue;
             }
 
             // Cek duplikat email
             if ($email && User::where('email', $email)->exists()) {
-                $errors[] = "Baris {$rowNum}: Email '{$email}' sudah terdaftar.";
+                $errors[] = "Row {$rowNum}: Email '{$email}' is already registered.";
                 $skipped++;
                 continue;
             }
@@ -106,14 +106,14 @@ class EmployeeImportController extends Controller
                                     ->first();
 
             if (!$department && !empty($deptName)) {
-                $errors[] = "Baris {$rowNum}: Departemen '{$deptName}' tidak ditemukan. Karyawan tetap dibuat tanpa departemen.";
+                $errors[] = "Row {$rowNum}: Department '{$deptName}' not found. Employee created without department.";
             }
 
             // Buat user
             User::create([
                 'name'          => $name,
                 'username'      => $usernameService->generate($name),
-                'email'         => $email,
+                'email'         => $email ?? null,
                 'password'      => Hash::make('password123'),
                 'id_staff'      => $idStaff,
                 'department_id' => $department?->id,
@@ -124,7 +124,7 @@ class EmployeeImportController extends Controller
             $imported++;
         }
 
-        $message = "Import selesai: {$imported} berhasil, {$skipped} dilewati.";
+        $message = "Import completed: {$imported} successful, {$skipped} skipped.";
 
         return back()
             ->with('success', $message)

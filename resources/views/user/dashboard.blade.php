@@ -2,6 +2,9 @@
 
 @php $user = auth()->user(); @endphp
 
+{{-- News Banner --}}
+<x-ui.news-banner :news="$activeNews" />
+
 {{-- ── BENTO ROW 1: Welcome + Quick Actions ── --}}
 <div style="display:grid; grid-template-columns:1fr 280px; gap:16px; margin-bottom:16px;">
 
@@ -20,7 +23,7 @@
                 {{ now()->format('l, d F Y') }}
             </p>
             <h2 style="font-size:22px; font-weight:800; margin-bottom:6px;">
-                Selamat Datang, {{ explode(' ', $user->name)[0] }}! 👋
+                Welcome, {{ explode(' ', $user->name)[0] }}! 👋
             </h2>
             <div style="display:flex; align-items:center; gap:16px; margin-top:12px; flex-wrap:wrap;">
                 <div style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.8;">
@@ -46,7 +49,7 @@
                 box-shadow:0 1px 4px rgba(0,0,0,0.06);">
         <p style="font-size:11px; font-weight:700; color:var(--gray-400);
                   text-transform:uppercase; letter-spacing:0.8px; margin-bottom:16px;">
-            Aksi Cepat
+            Quick Actions
         </p>
         <button onclick="openCreateTicketModal()"
                 style="width:100%; display:flex; align-items:center; gap:10px;
@@ -62,7 +65,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
             </div>
-            Buat Tiket Baru
+            Create New Ticket
         </button>
 
         <a href="{{ route('user.tickets.index') }}"
@@ -79,7 +82,7 @@
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
             </div>
-            Lihat Tiket Saya
+            View My Tickets
         </a>
     </div>
 </div>
@@ -88,11 +91,11 @@
 <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:16px;">
     @php
         $statItems = [
-            ['label' => 'Total Tiket',  'value' => $stats['total'],       'color' => 'navy',   'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+            ['label' => 'Total Tickets',  'value' => $stats['total'],       'color' => 'navy',   'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
             ['label' => 'Open',         'value' => $stats['open'],        'color' => 'gray',   'icon' => 'M12 4v16m8-8H4'],
             ['label' => 'In Progress',  'value' => $stats['in_progress'], 'color' => 'blue',   'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
             ['label' => 'Pending',      'value' => $stats['pending'],     'color' => 'amber',  'icon' => 'M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-            ['label' => 'Selesai',      'value' => $stats['resolved'],    'color' => 'green',  'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Resolved',     'value' => $stats['resolved'],    'color' => 'green',  'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
         ];
         $colorMap = [
             'navy'  => ['bg' => 'var(--navy-100)',  'color' => 'var(--navy-600)'],
@@ -130,16 +133,16 @@
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
         <div>
             <h3 style="font-size:15px; font-weight:700; color:var(--gray-900);">
-                📋 Recent Activity
+                📋 Recent Ticket
             </h3>
             <p style="font-size:12px; color:var(--gray-400); margin-top:2px;">
-                Tiket terbaru yang kamu buat
+                Recent ticket you create
             </p>
         </div>
         <a href="{{ route('user.tickets.index') }}"
            style="font-size:12px; font-weight:700; color:var(--navy-600); text-decoration:none;
                   display:flex; align-items:center; gap:4px;">
-            Lihat Semua
+            View All
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -197,8 +200,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
-            <p style="font-size:13px; font-weight:600;">Belum ada tiket</p>
-            <p style="font-size:12px; margin-top:4px;">Buat tiket pertamamu sekarang!</p>
+            <p style="font-size:13px; font-weight:600;">No tickets yet</p>
+            <p style="font-size:12px; margin-top:4px;">Create your first ticket now!</p>
         </div>
     @endforelse
 </div>
@@ -207,7 +210,7 @@
 <div class="quick-modal-overlay" id="createTicketOverlay">
     <div class="quick-modal" style="max-width:520px;">
         <div class="quick-modal-header">
-            <span class="quick-modal-title">🎫 Buat Tiket Baru</span>
+            <span class="quick-modal-title">🎫 Create New Ticket</span>
             <button class="quick-modal-close" onclick="closeCreateTicketModal()">✕</button>
         </div>
         <form method="POST" action="{{ route('user.tickets.store') }}"
@@ -215,35 +218,35 @@
             @csrf
             <div class="quick-modal-body" style="max-height:70vh; overflow-y:auto;">
                 <div class="form-group">
-                    <label class="form-label required">Judul Masalah</label>
+                    <label class="form-label required">Title</label>
                     <input type="text" name="title" class="form-control"
-                           placeholder="Contoh: Komputer tidak bisa menyala" required>
+                           placeholder="Example: Computer won't turn on" required>
                     @error('title') <span class="form-error">{{ $message }}</span> @enderror
                 </div>
                 <div class="form-group">
-                    <label class="form-label required">Deskripsi Masalah</label>
+                    <label class="form-label required">Description</label>
                     <textarea name="description" class="form-control" rows="4"
-                              placeholder="Jelaskan masalah kamu secara detail..."
+                              placeholder="Explain your issue in detail..."
                               required></textarea>
                     @error('description') <span class="form-error">{{ $message }}</span> @enderror
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Lampiran <span style="font-size:10px; color:var(--gray-400); font-weight:400;">(opsional)</span></label>
+                    <label class="form-label">Attachment <span style="font-size:10px; color:var(--gray-400); font-weight:400;">(optional)</span></label>
                     <input type="file" name="attachment" class="form-control"
                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
-                    <span class="form-hint">Format: JPG, PNG, PDF, DOC. Maksimal 2MB.</span>
+                    <span class="form-hint">Format: JPG, PNG, PDF, DOC. Maximum 2MB.</span>
                 </div>
                 <div class="alert alert-info" style="margin-bottom:0;">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span>Kategori dan prioritas akan ditentukan otomatis oleh sistem.</span>
+                    <span>Category and priority will be assigned automatically by the system.</span>
                 </div>
             </div>
             <div class="quick-modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeCreateTicketModal()">Batal</button>
-                <button type="submit" class="btn btn-primary">Kirim Tiket</button>
+                <button type="button" class="btn btn-secondary" onclick="closeCreateTicketModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Ticket</button>
             </div>
         </form>
     </div>

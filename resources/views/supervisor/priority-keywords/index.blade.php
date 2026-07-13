@@ -1,9 +1,9 @@
-<x-layout.app title="Keyword Prioritas" pageTitle="Keyword Prioritas">
+<x-layout.app title="Keyword Priority" pageTitle="Keyword Priority">
 
     <div class="page-header">
         <div>
-            <h1 class="page-title">Keyword Prioritas</h1>
-            <p class="page-subtitle">Kelola keyword untuk deteksi otomatis prioritas tiket</p>
+            <h1 class="page-title">Keyword Priority</h1>
+            <p class="page-subtitle">Manage keywords for automatic ticket priority detection</p>
         </div>
     </div>
 
@@ -12,7 +12,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <span>Keyword ini digunakan untuk mendeteksi tingkat urgensi dari deskripsi tiket. Sistem mengecek dari Critical → High → Medium. Jika tidak ada keyword yang cocok, prioritas ditentukan dari kategori tiket.</span>
+        <span>Keyword this is used to detect the urgency level from the ticket description. The system checks from Critical → High → Medium. If no matching keyword is found, the priority is determined by the ticket category.</span>
     </div>
 
     @php
@@ -59,11 +59,11 @@
                                         style="background:none; border:none; cursor:pointer;
                                             color:{{ $c['color'] }}; font-size:13px;
                                             line-height:1; padding:0 0 0 2px; opacity:0.7;"
-                                        onclick="return confirm('Hapus keyword ini?')">×</button>
+                                        onclick="return confirm('Delete this keyword?')">×</button>
                             </form>
                         </span>
                     @empty
-                        <span style="font-size:12px; color:var(--gray-400);">Belum ada keyword</span>
+                        <span style="font-size:12px; color:var(--gray-400);">No keywords added yet</span>
                     @endforelse
                 </div>
 
@@ -79,26 +79,26 @@
                             Keyword
                         </label>
                         <input type="text" name="keyword" class="form-control"
-                            placeholder="Tambah keyword {{ $priority->priority_name }}..."
+                            placeholder="Add keyword {{ $priority->priority_name }}..."
                             style="margin-bottom:0;" required>
                     </div>
 
                     <div style="width:100px;">
                         <label style="font-size:11px; font-weight:600; color:var(--gray-400);
                                     text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">
-                            Bobot
+                            Weight
                         </label>
                         <select name="weight" class="form-control" style="margin-bottom:0;" required>
-                            <option value="">Pilih</option>
-                            <option value="1">1 — Umum</option>
-                            <option value="3">3 — Standar</option>
-                            <option value="5">5 — Spesifik</option>
-                            <option value="10">10 — Kritis</option>
+                            <option value="">Select</option>
+                            <option value="1">1 — General</option>
+                            <option value="3">3 — Standard</option>
+                            <option value="5">5 — Specific</option>
+                            <option value="10">10 — Critical</option>
                         </select>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-sm" style="white-space:nowrap; height:38px;">
-                        + Tambah
+                        + add
                     </button>
                 </form>
             </div>

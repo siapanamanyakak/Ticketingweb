@@ -28,7 +28,7 @@ class PriorityKeywordController extends Controller
             ->exists();
 
         if ($exists) {
-            return back()->with('error', 'Keyword sudah ada untuk prioritas ini!');
+            return back()->with('error', 'Keyword already exists for this priority!');
         }
 
         PriorityKeyword::create([
@@ -37,12 +37,12 @@ class PriorityKeywordController extends Controller
             'weight'      => $request->weight,
         ]);
 
-        return back()->with('success', 'Keyword berhasil ditambahkan!');
+        return back()->with('success', 'Keyword added successfully!');
     }
 
     public function destroy(PriorityKeyword $priorityKeyword)
     {
         $priorityKeyword->delete();
-        return back()->with('success', 'Keyword berhasil dihapus!');
+        return back()->with('success', 'Keyword deleted successfully!');
     }
 }

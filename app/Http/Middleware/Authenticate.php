@@ -13,8 +13,8 @@ class Authenticate extends Middleware
     protected function redirectTo(Request $request): ?string
     {
         if (!$request->expectsJson()) {
-            // Simpan flash message sebelum redirect
-            session()->flash('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+            // Save flash message before redirect
+            session()->flash('error', 'Please log in first to access this page.');
             return route('login');
         }
 

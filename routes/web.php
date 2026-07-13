@@ -32,7 +32,7 @@ Route::get('/', function () {
     // 2. Jika SUDAH login, pastikan akunnya aktif (Menggantikan fungsi middleware 'active' khusus di halaman ini)
     if (!auth()->user()->is_active) { // 💡 Catatan: Sesuaikan 'is_active' dengan nama kolom status aktif di databasemu
         auth()->logout();
-        return redirect()->route('login')->with('error', 'Akun Anda tidak aktif.');
+        return redirect()->route('login')->with('error', 'Your account is not active.');
     }
 
     // 3. Jika aktif, lempar ke dashboard sesuai Role masing-masing
@@ -98,15 +98,14 @@ Route::middleware(['auth', 'active', 'role:it_support', 'prevent.back'])
         // Comments
         Route::post('/tickets/{ticket}/comments', [CommentController::class, 'store'])->name('tickets.comments.store');
 
+
         // Employee management (FR-04)
         Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
-        Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
         Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
         Route::get('/employees/import/template', [App\Http\Controllers\Support\EmployeeImportController::class, 'template'])->name('employees.import.template');
         Route::post('/employees/import', [App\Http\Controllers\Support\EmployeeImportController::class, 'import'])->name('employees.import');
-        Route::get('/employees/{user}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
-        Route::patch('/employees/{user}', [EmployeeController::class, 'update'])->name('employees.update');
-        Route::patch('/employees/{user}/toggle', [EmployeeController::class, 'toggle'])->name('employees.toggle');
+        Route::patch('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+        Route::patch('/employees/{employee}/toggle', [EmployeeController::class, 'toggle'])->name('employees.toggle');
 
         // Notifications
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -114,6 +113,16 @@ Route::middleware(['auth', 'active', 'role:it_support', 'prevent.back'])
         Route::delete('/notifications/delete-read', [NotificationController::class, 'deleteRead'])->name('notifications.deleteRead');
         Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::get('/notifications/{id}/read-redirect', [NotificationController::class, 'readAndRedirect'])->name('notifications.readRedirect');
+        // Support
+        Route::delete('/employees/{employee}', [App\Http\Controllers\Support\EmployeeController::class, 'destroy'])->name('employees.destroy');
+
+        // Support News Management
+        Route::get('/news', [App\Http\Controllers\Support\NewsController::class, 'index'])->name('news.index');
+        Route::post('/news', [App\Http\Controllers\Support\NewsController::class, 'store'])->name('news.store');
+        Route::patch('/news/{news}', [App\Http\Controllers\Support\NewsController::class, 'update'])->name('news.update');
+        Route::patch('/news/{news}/toggle', [App\Http\Controllers\Support\NewsController::class, 'toggle'])->name('news.toggle');
+        Route::delete('/news/{news}', [App\Http\Controllers\Support\NewsController::class, 'destroy'])->name('news.destroy');
+
 
         // Quick update dari card
         Route::patch('/tickets/{ticket}/priority', [App\Http\Controllers\Support\TicketController::class, 'updatePriority'])->name('tickets.updatePriority');
@@ -131,15 +140,15 @@ Route::middleware(['auth', 'active', 'role:it_supervisor', 'prevent.back'])
 
         // Technician management (FR-05)
         Route::get('/technicians', [TechnicianController::class, 'index'])->name('technicians.index');
-        Route::get('/technicians/create', [TechnicianController::class, 'create'])->name('technicians.create');
         Route::post('/technicians', [TechnicianController::class, 'store'])->name('technicians.store');
-        Route::get('/technicians/{user}/edit', [TechnicianController::class, 'edit'])->name('technicians.edit');
-        Route::patch('/technicians/{user}', [TechnicianController::class, 'update'])->name('technicians.update');
-        Route::patch('/technicians/{user}/toggle', [TechnicianController::class, 'toggle'])->name('technicians.toggle');
+        Route::get('/technicians/{technician}/edit', [TechnicianController::class, 'edit'])->name('technicians.edit');
+        Route::patch('/technicians/{technician}', [TechnicianController::class, 'update'])->name('technicians.update');
+        Route::patch('/technicians/{technician}/toggle', [TechnicianController::class, 'toggle'])->name('technicians.toggle');
+        // Supervisor
+        Route::delete('/technicians/{technician}', [App\Http\Controllers\Supervisor\TechnicianController::class, 'destroy'])->name('technicians.destroy');
 
         // SLA Management (FR-14)
         Route::get('/sla', [SlaController::class, 'index'])->name('sla.index');
-        Route::get('/sla/{sla}/edit', [SlaController::class, 'edit'])->name('sla.edit');
         Route::patch('/sla/{sla}', [SlaController::class, 'update'])->name('sla.update');
 
         // Work Schedule (FR-15)
@@ -154,6 +163,13 @@ Route::middleware(['auth', 'active', 'role:it_supervisor', 'prevent.back'])
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+
+        // Supervisor news management
+        Route::get('/news', [App\Http\Controllers\Supervisor\NewsController::class, 'index'])->name('news.index');
+        Route::post('/news', [App\Http\Controllers\Supervisor\NewsController::class, 'store'])->name('news.store');
+        Route::patch('/news/{news}', [App\Http\Controllers\Supervisor\NewsController::class, 'update'])->name('news.update');
+        Route::patch('/news/{news}/toggle', [App\Http\Controllers\Supervisor\NewsController::class, 'toggle'])->name('news.toggle');
+        Route::delete('/news/{news}', [App\Http\Controllers\Supervisor\NewsController::class, 'destroy'])->name('news.destroy');
 
         // Department Management
         Route::get('/departments', [App\Http\Controllers\Supervisor\DepartmentController::class, 'index'])->name('departments.index');
@@ -178,6 +194,8 @@ Route::middleware(['auth', 'active', 'role:it_supervisor', 'prevent.back'])
         Route::post('/priority-keywords', [App\Http\Controllers\Supervisor\PriorityKeywordController::class, 'store'])->name('priority-keywords.store');
         Route::delete('/priority-keywords/{priorityKeyword}', [App\Http\Controllers\Supervisor\PriorityKeywordController::class, 'destroy'])->name('priority-keywords.destroy');
 
+        Route::get('/technicians/import/template', [App\Http\Controllers\Supervisor\TechnicianController::class, 'importTemplate'])->name('technicians.import.template');
+        Route::post('/technicians/import', [App\Http\Controllers\Supervisor\TechnicianController::class, 'import'])->name('technicians.import');
 
         // Notifications
         Route::get('/notifications', [SupervisorNotificationController::class, 'index'])->name('notifications.index');
