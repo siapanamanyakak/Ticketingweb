@@ -146,6 +146,15 @@ public function history(Request $request)
         $ticket->reporter->notify(new \App\Notifications\TicketOutsideWorkingHours($ticket));
         }
 
+        $supports = \App\Models\User::where('role', 'it_support')
+    ->where('is_active', true)
+    ->where('id', '!=', auth()->id()) // exclude pembuat
+    ->get();
+
+    foreach ($supports as $support) {
+        $support->notify(new \App\Notifications\NewTicketNotification($ticket));
+    }
+
         // Catat log
         TicketLog::create([
         'ticket_id'     => $ticket->id,

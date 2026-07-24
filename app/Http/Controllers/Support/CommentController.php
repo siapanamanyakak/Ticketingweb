@@ -16,7 +16,8 @@ class CommentController extends Controller
             'comment'   => 'required|string',
         ]);
 
-        TicketComment::create([
+        // 1. Tampung hasil create() ke dalam variabel $comment
+        $comment = TicketComment::create([
             'ticket_id' => $ticket->id,
             'user_id'   => auth()->id(),
             'comment'   => $request->comment,
@@ -31,8 +32,8 @@ class CommentController extends Controller
             'note'          => 'IT Support commented on the ticket',
         ]);
 
-        // Notifikasi ke reporter
-        $ticket->reporter->notify(new \App\Notifications\NewCommentNotification($ticket, auth()->user()));
+        // 2. Kirimkan variabel $comment sebagai argumen ke-3 di sini
+        $ticket->reporter->notify(new \App\Notifications\NewCommentNotification($ticket, auth()->user(), $comment));
 
         return back()->with('success', 'Comment added successfully!');
     }

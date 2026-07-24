@@ -2,6 +2,7 @@
 
     {{-- News Banner --}}
     <x-ui.news-banner :news="$activeNews" />
+    <x-ui.email-reminder />
 
     <div class="page-header">
         <div>

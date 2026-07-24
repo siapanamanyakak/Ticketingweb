@@ -4,6 +4,7 @@
 
 {{-- News Banner --}}
 <x-ui.news-banner :news="$activeNews" />
+<x-ui.email-reminder />
 
 {{-- ── BENTO ROW 1: Welcome + Quick Actions ── --}}
 <div style="display:grid; grid-template-columns:1fr 280px; gap:16px; margin-bottom:16px;">

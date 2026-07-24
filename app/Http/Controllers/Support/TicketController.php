@@ -145,6 +145,9 @@ public function store(Request $request, SlaService $slaService, AutoCategoryServ
         $ticket->reporter->notify(new \App\Notifications\TicketOutsideWorkingHours($ticket));
     }
 
+    // Setelah SLA record dibuat
+    $ticket->load('reporter');
+
     // Kirim notifikasi ke semua IT Support & Supervisor kalau critical
     $priority = $ticket->priority;
     if ($priority && $priority->level === 'critical') {
@@ -155,6 +158,15 @@ public function store(Request $request, SlaService $slaService, AutoCategoryServ
         foreach ($recipients as $recipient) {
             $recipient->notify(new \App\Notifications\CriticalTicketNotification($ticket));
         }
+    }
+
+    // Notifikasi ke semua IT Support aktif
+    $supports = \App\Models\User::where('role', 'it_support')
+        ->where('is_active', true)
+        ->get();
+
+    foreach ($supports as $support) {
+        $support->notify(new \App\Notifications\NewTicketNotification($ticket));
     }
 
     // Flash modal diluar jam kerja

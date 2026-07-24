@@ -7,7 +7,7 @@ use App\Models\Ticket;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class CriticalTicketNotification extends Notification
+class NewTicketNotification extends Notification
 {
     use Queueable;
 
@@ -28,21 +28,23 @@ class CriticalTicketNotification extends Notification
     // Gunakan method toMail khusus untuk pengiriman email
     public function toMail(object $notifiable)
     {
-        return (new TicketNotificationMail(
-            notifTitle  : "🚨 Critical Ticket: {$this->ticket->ticket_number}",
-            notifMessage: "A critical priority ticket has been submitted: {$this->ticket->title}",
-            notifUrl    : route('support.tickets.show', $this->ticket),
-            notifType   : 'critical',
-            ticket      : $this->ticket,
-        ))->to($notifiable->email);
+    $departmentName = $this->ticket->reporter->department?->name ?? 'N/A';
+
+    return (new TicketNotificationMail(
+        notifTitle  : "New Ticket: {$this->ticket->ticket_number}",
+        notifMessage: "A new ticket has been submitted by {$this->ticket->reporter->name} ({$departmentName}).",
+        notifUrl    : route('support.tickets.show', $this->ticket),
+        notifType   : 'info',
+        ticket      : $this->ticket  // ← pass ticket untuk detail lengkap
+    ))->to($notifiable->email);
     }
 
     public function toDatabase(object $notifiable): array
     {
         return [
-            'type'      => 'critical_ticket',
+            'type'      => 'new_ticket',
             'ticket_id' => $this->ticket->id,
-            'message'   => "🚨 Critical ticket submitted: {$this->ticket->ticket_number} — {$this->ticket->title}",
+            'message'   => "🎫 New ticket from {$this->ticket->reporter->name}: {$this->ticket->ticket_number} — {$this->ticket->title}",
             'url'       => route('support.tickets.show', $this->ticket),
         ];
     }

@@ -45,6 +45,7 @@
             $newStatus = $notif->data['new_status'] ?? null;
 
             $typeConfig = match(true) {
+                $type === 'new_ticket'                  => ['icon' => '🎫', 'label' => 'New Ticket',      'bg' => '#f0fdf4', 'color' => '#15803d'],
                 str_contains($type, 'sla_warning')         => ['icon' => '⚠️', 'label' => 'SLA Warning',     'bg' => '#fef3c7', 'color' => '#b45309'],
                 $type === 'critical_ticket'                 => ['icon' => '🚨', 'label' => 'Critical Ticket', 'bg' => '#fce7f3', 'color' => '#9d174d'],
                 $type === 'outside_working_hours'           => ['icon' => '🌙', 'label' => 'Outside Working Hours', 'bg' => '#eff6ff', 'color' => '#1d4ed8'],
