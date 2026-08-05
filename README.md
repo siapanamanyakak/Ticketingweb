@@ -4,13 +4,14 @@ Sistem pelaporan dan manajemen kendala IT berbasis web yang dirancang untuk mera
 
 ## Fitur Utama
 
-- **🤖 Auto-Categorization & Priority:** Fitur otomatisasi berbasis logika *keyword-matching* yang mampu mendeteksi kata kunci dari laporan pengguna untuk menentukan kategori dan prioritas masalah secara otomatis, sehingga memangkas beban administratif teknisi.
-- **⏱️ Modul SLA (Service Level Agreement):** Parameter pengukuran kinerja yang memantau *response time* dan *resolved time* berdasarkan tingkat prioritas. Pelapor dapat melihat estimasi waktu penyelesaian secara langsung.
-- **📝 Manajemen Tiket Terstruktur:** Dokumentasi rapi untuk setiap tiket pelaporan, lengkap dengan log perubahan riwayat penanganan, serta fitur komunikasi interaktif antara pengguna dan teknisi IT.
-- **📊 Dashboard & Visualisasi Data:** Antarmuka yang menyajikan rekapitulasi data layanan IT dalam bentuk grafik visual untuk kemudahan pemantauan (monitoring).
-- **📥 Ekspor Laporan:** Dukungan *export* data pelaporan dan penyelesaian masalah untuk memfasilitasi evaluasi kinerja manajemen, analisis kinerja teknisi, dan pengarsipan solusi teknis.
+- **Auto-Categorization & Priority:** Fitur otomatisasi berbasis logika *keyword-matching* yang mampu mendeteksi kata kunci dari laporan pengguna untuk menentukan kategori dan prioritas masalah secara otomatis, sehingga memangkas beban administratif teknisi.
+- **Modul SLA (Service Level Agreement):** Parameter pengukuran kinerja yang memantau *response time* dan *resolved time* berdasarkan tingkat prioritas. Pelapor dapat melihat estimasi waktu penyelesaian secara langsung.
+- **Manajemen Tiket Terstruktur:** Dokumentasi rapi untuk setiap tiket pelaporan, lengkap dengan log perubahan riwayat penanganan, serta fitur komunikasi interaktif antara pengguna dan teknisi IT.
+- **Notifikasi Email:** Mengirimkan pembaruan status tiket dan informasi penting lainnya langsung ke email pengguna atau teknisi terkait.
+- **Dashboard & Visualisasi Data:** Antarmuka yang menyajikan rekapitulasi data layanan IT dalam bentuk grafik visual untuk kemudahan pemantauan (monitoring).
+- **Ekspor Laporan:** Dukungan *export* data pelaporan dan penyelesaian masalah untuk memfasilitasi evaluasi kinerja manajemen, analisis kinerja teknisi, dan pengarsipan solusi teknis.
 
-## 🛠️ Teknologi yang Digunakan
+## Teknologi yang Digunakan
 
 - **Frontend:** HTML, CSS, JavaScript, Framework CSS (Node/NPM)
 - **Backend:** PHP (Laravel Framework)
@@ -35,15 +36,30 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek ini di *local machine* An
    ```
 
 3. **Konfigurasi Environment & Database**
-   - Buat database baru di MySQL (contoh: `db_ticketing`).
    - Salin file `.env.example` menjadi `.env`:
      ```bash
      cp .env.example .env
      ```
-   - Buka file `.env` dan sesuaikan kredensial database Anda (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
    - Generate Application Key:
      ```bash
      php artisan key:generate
+     ```
+   - Buka file `.env` dan sesuaikan kredensial database Anda:
+     ```env
+     DB_DATABASE=db_ticketing
+     DB_USERNAME=root
+     DB_PASSWORD=
+     ```
+   - **Konfigurasi Email:** Sesuaikan pengaturan SMTP di file `.env` untuk mengaktifkan fitur pengiriman email (contoh menggunakan Gmail atau Mailtrap):
+     ```env
+     MAIL_MAILER=smtp
+     MAIL_HOST=smtp.gmail.com
+     MAIL_PORT=465
+     MAIL_USERNAME=email_anda@gmail.com
+     MAIL_PASSWORD=password_app_anda
+     MAIL_ENCRYPTION=ssl
+     MAIL_FROM_ADDRESS=email_anda@gmail.com
+     MAIL_FROM_NAME="${APP_NAME}"
      ```
 
 4. **Migrasi Database**
@@ -54,7 +70,7 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek ini di *local machine* An
    *(Opsional: Tambahkan `--seed` jika Anda memiliki data dumi/awal)*
 
 5. **Jalankan Aplikasi**
-   Anda perlu menjalankan beberapa *terminal* terpisah untuk menjalankan aplikasi, *frontend assets*, dan *scheduler* (terutama untuk fungsi SLA):
+   Anda perlu menjalankan beberapa *terminal* terpisah untuk menjalankan aplikasi, *frontend assets*, *scheduler* (SLA), dan *queue worker* (Email):
 
    - Terminal 1 (Menjalankan Web Server):
      ```bash
@@ -78,13 +94,9 @@ Sistem ini dirancang untuk mengakomodasi tiga peran utama:
 2. **IT Support (Teknisi):** Staf yang menerima tugas, menangani masalah, dan mendokumentasikan penyelesaian.
 3. **IT Supervisor/Admin:** Pihak manajemen yang mengelola seluruh tiket, memantau metrik SLA, mengevaluasi kinerja teknisi, dan menarik laporan layanan IT.
 
-## Penulis
+## Developer
 
 **Bryan Aditya Dachi**  
 *Politeknik Negeri Batam*  
 
 Proyek ini dikembangkan dan dirancang sebagai bagian dari pemenuhan syarat kelulusan Tugas Akhir.
-
-## Lisensi
-
-[MIT License](LICENSE)
