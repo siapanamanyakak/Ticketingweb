@@ -1,66 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# IT Helpdesk Ticketing System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem pelaporan dan manajemen kendala IT berbasis web yang dirancang untuk merampingkan proses operasional dan administratif tim IT Support. Sistem ini mendigitalisasi pelaporan masalah yang sebelumnya berjalan konvensional dan manual menjadi lebih terpusat, transparan, serta terukur (diimplementasikan untuk studi kasus lingkungan operasional di KTU Shipyard Sagulung).
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **🤖 Auto-Categorization & Priority:** Fitur otomatisasi berbasis logika *keyword-matching* yang mampu mendeteksi kata kunci dari laporan pengguna untuk menentukan kategori dan prioritas masalah secara otomatis, sehingga memangkas beban administratif teknisi.
+- **⏱️ Modul SLA (Service Level Agreement):** Parameter pengukuran kinerja yang memantau *response time* dan *resolved time* berdasarkan tingkat prioritas. Pelapor dapat melihat estimasi waktu penyelesaian secara langsung.
+- **📝 Manajemen Tiket Terstruktur:** Dokumentasi rapi untuk setiap tiket pelaporan, lengkap dengan log perubahan riwayat penanganan, serta fitur komunikasi interaktif antara pengguna dan teknisi IT.
+- **📊 Dashboard & Visualisasi Data:** Antarmuka yang menyajikan rekapitulasi data layanan IT dalam bentuk grafik visual untuk kemudahan pemantauan (monitoring).
+- **📥 Ekspor Laporan:** Dukungan *export* data pelaporan dan penyelesaian masalah untuk memfasilitasi evaluasi kinerja manajemen, analisis kinerja teknisi, dan pengarsipan solusi teknis.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Teknologi yang Digunakan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Frontend:** HTML, CSS, JavaScript, Framework CSS (Node/NPM)
+- **Backend:** PHP (Laravel Framework)
+- **Database:** MySQL
+- **Pengujian:** Diuji secara lokal dan jarak jauh menggunakan akses *Cloudflared Tunnel*.
 
-## Learning Laravel
+## Panduan Instalasi (Local Development)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Ikuti langkah-langkah berikut untuk menjalankan proyek ini di *local machine* Anda:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Clone Repository**
+   ```bash
+   git clone [https://github.com/siapanamanyakak/Ticketingweb.git](https://github.com/siapanamanyakak/Ticketingweb.git)
+   cd Ticketingweb
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Install Dependencies**
+   Pastikan Anda sudah menginstal Composer dan Node.js, kemudian jalankan:
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Laravel Sponsors
+3. **Konfigurasi Environment & Database**
+   - Buat database baru di MySQL (contoh: `db_ticketing`).
+   - Salin file `.env.example` menjadi `.env`:
+     ```bash
+     cp .env.example .env
+     ```
+   - Buka file `.env` dan sesuaikan kredensial database Anda (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
+   - Generate Application Key:
+     ```bash
+     php artisan key:generate
+     ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+4. **Migrasi Database**
+   Jalankan perintah ini untuk membangun tabel database:
+   ```bash
+   php artisan migrate
+   ```
+   *(Opsional: Tambahkan `--seed` jika Anda memiliki data dumi/awal)*
 
-### Premium Partners
+5. **Jalankan Aplikasi**
+   Anda perlu menjalankan beberapa *terminal* terpisah untuk menjalankan aplikasi, *frontend assets*, dan *scheduler* (terutama untuk fungsi SLA):
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+   - Terminal 1 (Menjalankan Web Server):
+     ```bash
+     php artisan serve
+     ```
+   - Terminal 2 (Kompilasi Frontend Assets):
+     ```bash
+     npm run dev
+     ```
+   - Terminal 3 (Menjalankan Task Scheduler/Background Jobs):
+     ```bash
+     php artisan schedule:work
+     ```
 
-## Contributing
+   Akses aplikasi melalui browser pada alamat `http://localhost:8000`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Pengguna Sistem (Role)
 
-## Code of Conduct
+Sistem ini dirancang untuk mengakomodasi tiga peran utama:
+1. **User/Pelapor:** Karyawan dari berbagai departemen yang melaporkan kendala IT, memantau status tiket, dan melihat estimasi SLA.
+2. **IT Support (Teknisi):** Staf yang menerima tugas, menangani masalah, dan mendokumentasikan penyelesaian.
+3. **IT Supervisor/Admin:** Pihak manajemen yang mengelola seluruh tiket, memantau metrik SLA, mengevaluasi kinerja teknisi, dan menarik laporan layanan IT.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Penulis
 
-## Security Vulnerabilities
+**Bryan Aditya Dachi**  
+*Politeknik Negeri Batam*  
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Proyek ini dikembangkan dan dirancang sebagai bagian dari pemenuhan syarat kelulusan Tugas Akhir.
 
-## License
+## Lisensi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+[MIT License](LICENSE)
